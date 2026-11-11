@@ -5106,7 +5106,11 @@
   function activeAccounts() { return state.accounts.filter(function (a) { return !a.archived; }); }
   function accountById(id) { for (var i = 0; i < state.accounts.length; i++) if (state.accounts[i].id === id) return state.accounts[i]; return null; }
   function accountName(id) { var a = accountById(id); return a ? a.name : ""; }
-  function accountHasOps(id) { return state.operations.some(function (op) { return op.accountId === id || op.toAccountId === id; }); }
+  // 1.3.1: взносы в цели (и возвраты из копилки) — тоже движения по счёту: такой счёт нельзя удалить и сменить ему валюту
+  function accountHasOps(id) {
+    return state.operations.some(function (op) { return op.accountId === id || op.toAccountId === id; }) ||
+      state.goals.some(function (g) { return g.contributions.some(function (c) { return c.accountId === id; }); });
+  }
   // «−1 200,50» → −120050; пусто → 0; иначе null
   function parseSigned(text) {
     var t = String(text).replace(/\s/g, "").replace("−", "-").replace(",", ".");
@@ -6831,16 +6835,30 @@
     save(); render(); closeModal();
     toast(isNew ? "Цель добавлена: " + name : "Цель сохранена");
   }
+  // 1.3.1: при удалении цели возвращается ровно остаток копилки (не больше). Делим его по счетам, с которых
+  // вносили, — каждому не больше его чистого вклада (взносы − «Забрать»); остаток (например, «уже накоплено»
+  // без счёта) — на рублёвый счёт по умолчанию. Сумма на счетах + в копилках не меняется.
+  function goalReturnParts(g) {
+    var left = Math.max(0, goalSaved(g)), by = dict(), parts = [];
+    g.contributions.forEach(function (c) { if (c.accountId) by[c.accountId] = (by[c.accountId] || 0) + c.amount; });
+    Object.keys(by).filter(function (k) { return by[k] > 0 && accountById(k); }).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) {
+      var x = Math.min(by[k], left);
+      if (x > 0) { parts.push({ accountId: k, amount: x }); left -= x; }
+    });
+    if (left > 0) {
+      var to = rubAccountId(), p = parts.filter(function (x) { return x.accountId === to; })[0];
+      if (p) p.amount += left; else if (accountById(to)) parts.push({ accountId: to, amount: left });
+    }
+    return parts;
+  }
   function deleteGoal() {
     var g = goalById(goalEditId);
     if (!g) return;
-    var by = dict(), total = 0;
-    g.contributions.forEach(function (c) { if (c.accountId) { by[c.accountId] = (by[c.accountId] || 0) + c.amount; } });
-    Object.keys(by).forEach(function (k) { if (by[k] > 0) total += by[k]; });
+    var parts = goalReturnParts(g), total = parts.reduce(function (s, x) { return s + x.amount; }, 0);
     if (!confirm("Удалить «" + g.title + "»?" + (total ? " Отложенные " + stripAmt(money(total)) + " вернутся на счета, с которых вносились" : ""))) return;
     // Деньги — обратно на счета записью «Возврат из копилки», история взносов остаётся в «Операциях»
     var added = [];
-    Object.keys(by).forEach(function (k) { if (by[k] > 0) { var c = { id: makeId(), date: todayStr(), amount: -by[k], accountId: k, ret: true }; g.contributions.push(c); added.push(c); } });
+    parts.forEach(function (x) { var c = { id: makeId(), date: todayStr(), amount: -x.amount, accountId: x.accountId, ret: true }; g.contributions.push(c); added.push(c); });
     g.deleted = true;
     var plans = state.plans.filter(function (p) { return p.kind === "goal" && p.goalId === g.id; });
     save(); render(); closeModal();
@@ -7002,9 +7020,17 @@
     });
     return out;
   }
+  // 1.3.1: возврат из копилки и взносы удалённой цели не удаляются; взнос нельзя удалить, если из копилки уже забрали больше остатка
+  function contribLocked(it) {
+    if (it.contrib.ret || it.goal.deleted) return "Это история удалённой цели — её нельзя удалить";
+    if (it.contrib.amount > 0 && goalSaved(it.goal) - it.contrib.amount < 0) return "Нельзя удалить: эти деньги уже забраны из копилки";
+    return "";
+  }
   function removeContrib(it) {
     var g = it.goal, c = it.contrib, i = g.contributions.indexOf(c);
     if (i === -1) return;
+    var why = contribLocked(it);
+    if (why) { toast(why); return; }
     g.contributions.splice(i, 1);
     var p = c.planId && planById(c.planId);
     if (p && c.planDate) setMark(p, c.planDate, "");
@@ -7029,8 +7055,10 @@
     dots.setAttribute("aria-label", "Действия: " + it.label + ", " + sumText);
     dots.title = "Действия";
     function menu(anchor) {
-      openMiniMenu(anchor, [{ label: "Открыть цели", fn: function () { goTo("budget"); setPlanSub("goals"); } },
-                            { label: "Удалить взнос", danger: true, fn: function () { removeContrib(it); } }]);
+      var items = [{ label: "Открыть цели", fn: function () { goTo("budget"); setPlanSub("goals"); } }];
+      if (!contribLocked(it)) items.push({ label: "Удалить взнос", danger: true, fn: function () { removeContrib(it); } });
+      else if (it.contrib.ret || it.goal.deleted) items = [{ label: "Цель удалена — запись только для истории", fn: function () {} }];
+      openMiniMenu(anchor, items);
     }
     dots.addEventListener("click", function (e) { e.stopPropagation(); menu(dots); });
     li.querySelector(".actions").appendChild(dots);

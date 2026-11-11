@@ -5,7 +5,7 @@
 "use strict";
 
 // Номер версии. Меняйте при каждой новой выкладке: кэш пересоберётся целиком.
-const VERSION = "1.3.0";
+const VERSION = "1.3.1";
 const PREFIX = "finance-app-files-";
 const CACHE = PREFIX + VERSION;
 
