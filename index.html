@@ -118,6 +118,9 @@
     --menu-scrim: rgba(0, 0, 0, .25);
     --accent: var(--expense);             /* 17.23.1: точка «не текущий месяц» на 📅 — цветом счётчика 🔔 */
     /* панель выбора месяца (17.23) */
+    --pill-border: #566965;   /* №42: рамка «Текущий месяц ▾» прямо на фоне — 4,2:1 к основе, 3,15:1 к самой тёмной точке */
+    --mp-dot: #1F4D3F;        /* З6 (17.24): точка на 📅 */
+    --ts-on: #1F4D3F; --ts-on-text: #FFFFFF; --ts-exp: #FFFFFF; --ts-inc: #FFFFFF; /* З7 (17.24): активный тип в форме — зелёный, как период */
     --mp-border: rgba(19, 32, 30, .10);
     --mp-hover: rgba(19, 32, 30, .06);
     --mp-today: rgba(19, 32, 30, .35);
@@ -183,6 +186,9 @@
     --glass-solid: #24211D;
     --chip-bg: #34302B;
     --chip-border: transparent;
+    --pill-border: var(--border-strong);
+    --mp-dot: var(--primary);
+    --ts-on: var(--surface); --ts-on-text: var(--text-2); --ts-exp: var(--expense-text); --ts-inc: var(--income);
     --mp-border: rgba(255, 255, 255, .12);
     --mp-hover: rgba(255, 255, 255, .08);
     --mp-today: rgba(255, 255, 255, .40);
@@ -322,7 +328,7 @@
   @media (hover: hover) { .select .dd-btn:hover { border-color: var(--text-3); } }
   .select .dd-btn[aria-expanded="true"] { border-color: var(--primary); }
   .acc-select .dd-btn { height: 44px; border-radius: 999px; }
-  .pill-select .dd-btn, .screen .card .pill-select .dd-btn { height: 44px; border-radius: 999px; padding: 0 40px 0 18px; background: var(--glass-strong); font-weight: 500; }
+  .pill-select .dd-btn, .screen .card .pill-select .dd-btn { height: 44px; border-radius: 999px; padding: 0 40px 0 18px; background: var(--glass-strong); border-color: var(--pill-border); font-weight: 500; }
   .dd-list {
     position: fixed; z-index: 45; max-height: 320px; overflow-y: auto; overscroll-behavior: contain; padding: 6px; border-radius: 16px;
     background: var(--glass-strong); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); border: 1px solid var(--glass-border); box-shadow: var(--shadow-lg);
@@ -409,9 +415,9 @@
     display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 999px;
     transition: background-color .15s ease-out, color .15s ease-out;
   }
-  .type-switch button.active span { background: var(--surface); box-shadow: var(--shadow-sm); }
-  .type-switch button.active.exp span { color: var(--expense-text); }
-  .type-switch button.active.inc span { color: var(--income); }
+  .type-switch button.active span { background: var(--ts-on); color: var(--ts-on-text); box-shadow: var(--shadow-sm); }
+  .type-switch button.active.exp span { color: var(--ts-exp); }
+  .type-switch button.active.inc span { color: var(--ts-inc); }
   .type-switch { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .type-switch button.dim span { opacity: .6; }
   .trf-need { margin: -4px 0 12px; }
@@ -589,6 +595,8 @@
     #screen-accounts .acc-grid > .card { height: 100%; grid-column: 1 / -1; }
     #screen-accounts .acc-grid:has(#ratesCard:not([hidden])) .acc-total-card { grid-column: span 8; }
     #screen-accounts .acc-grid #ratesCard { grid-column: span 4; }
+    /* З8 (17.24): «Курсы к рублю» по высоте содержимого, не тянется за «Всего» */
+    #screen-accounts .acc-grid > #ratesCard { height: auto; align-self: start; }
   }
   /* Плитка «Всего на счетах» с глазом (17.10) */
   .m-head { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin: -10px -10px 0 0; }
@@ -1087,7 +1095,7 @@
     .home-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 8px 0 16px; }
     .home-head .month-nav { display: none; }
     .head-actions { display: flex !important; gap: 8px; align-items: center; }
-    .pill-select select { height: 44px; border-radius: 999px; padding: 0 40px 0 18px; background: var(--glass-strong); border-color: var(--border-strong); font-weight: 500; }
+    .pill-select select { height: 44px; border-radius: 999px; padding: 0 40px 0 18px; background: var(--glass-strong); border-color: var(--pill-border); font-weight: 500; }
     .card { margin-bottom: 0; }
   }
   /* ===== Сетка «конструктор» (17.13): 12 колонок, каждый ряд ровный ===== */
@@ -1423,12 +1431,18 @@
 
   /* «Счета» (17.22.8): строка — сетка «значок · название/тип · сумма/≈ · ✎»; все ✎ на одной направляющей */
   .acc-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px; column-gap: 12px; align-items: center; min-height: 60px; }
-  .acc-open { display: grid; grid-template-columns: 40px minmax(40px, 1fr) minmax(0, max-content); column-gap: 12px; row-gap: 2px; align-items: baseline; min-height: 60px; padding: 8px 4px; }
+  /* В9 (17.24): строки блока по высоте текста и по центру строки; у названия и суммы общая базовая линия */
+  .acc-open { display: grid; grid-template-columns: 40px minmax(40px, 1fr) minmax(0, max-content); column-gap: 12px; row-gap: 0; align-items: baseline; align-content: center; min-height: 60px; padding: 8px 4px; }
   .acc-open .acc-ico { grid-column: 1; grid-row: 1 / span 2; align-self: center; }
   .acc-open .acc-name { grid-column: 2; grid-row: 1; line-height: 20px; }
   .acc-open .acc-bal { grid-column: 3; grid-row: 1; line-height: 20px; text-align: right; overflow: hidden; }
-  .acc-open .acc-kind { grid-column: 2; grid-row: 2; }
-  .acc-open .acc-rub { grid-column: 3; grid-row: 2; text-align: right; }
+  .acc-open .acc-kind { grid-column: 2; grid-row: 2; margin-top: 2px; }
+  .acc-open .acc-kind:empty { display: none; }
+  /* В9: строка без второй строки — значок только в 1-м ряду (40), название и сумма на общей базовой линии по его центру */
+  .acc-open:has(.acc-kind:empty):has(.acc-rub[hidden]) .acc-ico { grid-row: 1; }
+  .acc-open:has(.acc-kind:empty):has(.acc-rub[hidden]) .acc-name,
+  .acc-open:has(.acc-kind:empty):has(.acc-rub[hidden]) .acc-bal { padding-top: 10px; }
+  .acc-open .acc-rub { grid-column: 3; grid-row: 2; margin-top: 2px; text-align: right; }
   button.icon.acc-edit { width: 44px; height: 44px; min-height: 44px; color: var(--text-2); }
   .acc-edit svg { display: block; }
   .rates-card .card-head { margin-bottom: 4px; }
@@ -1506,7 +1520,7 @@
   /* ===== 17.23: выбор месяца на телефоне и планшете ===== */
   .month-title { display: none; }
   .month-btn { display: none; position: relative; }
-  .mp-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); } /* как счётчик 🔔, без цифры */
+  .mp-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--mp-dot); } /* З6 (17.24): цвет --primary, чтобы не путать со счётчиком 🔔 */
   .mp-dot[hidden], .month-picker[hidden], .mp-now[hidden] { display: none; }
   .month-picker {
     position: absolute; z-index: 30; top: calc(100% + 8px); right: 0; width: min(320px, calc(100vw - 32px)); padding: 15px; border-radius: 20px; /* 16 вместе с рамкой: высота 288 / 340 */
@@ -1535,6 +1549,255 @@
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
     .toast .timer { display: none; }
   }
+  /* ===== 17.25: «План» — Календарь и Цели ===== */
+  .plan-tabs.segmented { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 44px; min-height: 44px; margin: 0 0 16px; }
+  .plan-tabs.segmented label > span { height: 36px; font-size: 13px; font-weight: 500; padding: 0 8px; } /* вариант 36 + отступ 4 = нажимается вся высота 44 */
+  @media (min-width: 1025px) { .plan-tabs.segmented { display: inline-grid; grid-template-columns: repeat(3, auto); } .plan-tabs.segmented label > span { padding: 0 20px; } }
+  .cal-layout[hidden], .goals-pane[hidden], .pair[hidden] { display: none; }
+  /* Календарь: телефон — сводка, месяц, ближайшие */
+  .cal-layout { display: flex; flex-direction: column; gap: 12px; }
+  .cal-layout > .card, .cal-side-in > .card { margin: 0; min-width: 0; }
+  .cal-side, .cal-side-in { display: contents; }
+  .cal-sum { order: 1; } .cal-month { order: 2; } .cal-up { order: 3; }
+  .cs-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .cs-col { min-width: 0; }
+  .cs-right { text-align: right; }
+  .cs-label { font-size: 13px; line-height: 18px; color: var(--text-2); }
+  .cs-val { font-size: 22px; line-height: 28px; font-weight: 300; white-space: nowrap; }
+  .cs-val.income { color: var(--income); }
+  .cs-note { margin-top: 8px; font-size: 13px; line-height: 18px; color: var(--text-2); }
+  .cs-note[hidden] { display: none; }
+  .cal-month { padding: 12px 12px 16px; }
+  .cm-head { position: relative; display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; margin-bottom: 8px; }
+  .cm-head .cm-nav { width: 44px; height: 44px; min-height: 44px; color: var(--text); }
+  .cm-nav svg { display: block; }
+  .cm-title { justify-self: center; min-height: 44px; padding: 0 12px; background: transparent; color: var(--text); font-size: 17px; font-weight: 500; border-radius: 14px; }
+  @media (hover: hover) { .cm-title:hover { background: var(--glass-2); } }
+  .cm-today { display: none; }
+  .cm-head .month-picker { left: 50%; right: auto; margin-left: max(-160px, calc(-50vw + 16px)); }
+  .cm-wd { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-bottom: 4px; }
+  .cm-wd span { text-align: center; font-size: 12px; line-height: 16px; font-weight: 500; color: var(--text-2); }
+  .cm-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+  .cm-day {
+    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0; min-width: 0;
+    height: 48px; min-height: 44px; padding: 5px 0 0; border-radius: 14px; background: transparent; color: var(--text); font-weight: 400;
+  }
+  .cm-day:active { transform: none; }
+  @media (hover: hover) { button.cm-day:hover { background: var(--glass-2); } }
+  .cm-day.out { color: var(--text-3); }
+  @media (max-width: 374px) { .cal-month { padding: 12px 8px 16px; } .cm-grid, .cm-wd { gap: 0; } } /* 360: ячейки ≥ 44 */
+  .cd-num { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 24px; border-radius: 999px; font-size: 15px; line-height: 20px; }
+  .cm-day.today .cd-num { box-shadow: inset 0 0 0 1.5px var(--primary); font-weight: 500; }
+  .cm-day.sel { background: var(--seg-on); color: var(--seg-on-text); }
+  @media (hover: hover) { button.cm-day.sel:hover { background: var(--seg-on); } }
+  .cm-day.sel.today .cd-num { box-shadow: inset 0 0 0 1.5px var(--seg-on-text); }
+  .cd-dots { display: flex; align-items: center; gap: 3px; height: 12px; margin-top: 2px; }
+  .cd-evs { display: none; }
+  .dot { display: block; flex: none; width: 5px; height: 5px; border-radius: 50%; background: var(--text-2); }
+  .dot-inc { background: var(--income); } .dot-bday { background: var(--warn); } .dot-ev { background: var(--link); }
+  .dot-goal { background: transparent; box-shadow: inset 0 0 0 1.5px var(--primary); }
+  .cm-day.sel .dot { background: var(--seg-on-text); } .cm-day.sel .dot-goal { background: transparent; box-shadow: inset 0 0 0 1.5px var(--seg-on-text); }
+  .cd-more { font-size: 10px; line-height: 12px; font-weight: 500; color: var(--text-2); }
+  .cm-day.sel .cd-more { color: var(--seg-on-text); }
+  .cu-head { margin-bottom: 4px; gap: 4px; }
+  .cu-btns { display: flex; align-items: center; flex: none; }
+  .cu-btns button.link { min-height: 44px; padding: 0 8px; }
+  .ev-list { list-style: none; margin: 0; padding: 0; }
+  .ev-group { padding: 16px 0 4px; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--text-2); }
+  .ev-group:first-child { padding-top: 4px; }
+  .ev-row { border-bottom: 1px solid var(--glass-2-border); }
+  .ev-row:last-child { border-bottom: 0; }
+  .ev-open {
+    display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; column-gap: 12px; width: 100%; min-height: 56px; padding: 8px 0;
+    background: transparent; color: var(--text); border-radius: 0; text-align: left; font-weight: 400;
+  }
+  .ev-open:active { transform: none; }
+  @media (hover: hover) { .ev-open:hover { background: transparent; } .ev-open:hover .ev-title { text-decoration: underline; } }
+  .ev-ico { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: var(--glass-2); font-size: 20px; }
+  .ev-text { display: flex; flex-direction: column; min-width: 0; }
+  .ev-title { font-size: 15px; line-height: 20px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ev-meta, .ev-save { font-size: 13px; line-height: 18px; color: var(--text-2); }
+  .ev-late { font-size: 13px; line-height: 18px; font-weight: 500; color: var(--warn-text); }
+  .ev-sum { font-size: 15px; line-height: 20px; font-weight: 500; white-space: nowrap; text-align: right; }
+  .ev-sum.income { color: var(--income); }
+  .ev-marked .ev-title, .ev-marked .ev-sum { color: var(--text-2); }
+  .cu-none { padding: 12px 0 4px; color: var(--text-2); font-size: 15px; }
+  .cu-none[hidden], .cu-empty[hidden] { display: none; }
+  .cu-empty p { margin: 8px 0 12px; color: var(--text-2); font-size: 15px; line-height: 22px; }
+  .cu-tpls { display: flex; flex-wrap: wrap; gap: 8px; }
+  button.tpl-chip { min-height: 44px; height: 44px; padding: 0 16px; border-radius: 22px; background: var(--glass-2); color: var(--text); border: 1px solid var(--glass-2-border); }
+  @media (hover: hover) { button.tpl-chip:hover { background: var(--surface-3); } }
+  /* Компьютер: месяц 8 колонок, справа сводка и ближайшие (высота — по месяцу, список прокручивается) */
+  @media (min-width: 1025px) {
+    .cal-layout { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+    .cal-month { grid-column: span 8; padding: 16px 20px 20px; order: 0; }
+    .cal-side { display: block; grid-column: span 4; position: relative; min-height: 360px; }
+    .cal-side-in { display: flex; flex-direction: column; gap: 16px; position: absolute; inset: 0; }
+    .cal-up { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    .cm-head { grid-template-columns: 44px auto 44px 1fr; justify-items: start; }
+    .cm-title { justify-self: start; font-size: 20px; }
+    .cm-today { display: block; justify-self: end; }
+    .cm-today[hidden] { display: none; }
+    .cm-head .month-picker { left: 44px; margin-left: 0; }
+    .cm-wd span { text-align: left; padding-left: 8px; }
+    .cm-day { height: 104px; align-items: stretch; padding: 6px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--glass-2-border); }
+    .cm-day.out { box-shadow: none; }
+    .cd-num { align-self: flex-start; }
+    .cd-dots { display: none; }
+    .cd-evs { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; min-width: 0; }
+    .cd-ev { display: flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border-radius: 6px; background: var(--glass-2); font-size: 12px; line-height: 16px; font-weight: 500; min-width: 0; color: var(--text); }
+    .cd-evt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .cd-evs .cd-more { padding-left: 6px; font-size: 12px; line-height: 16px; }
+    .cm-day.sel { background: var(--glass-2); color: var(--text); box-shadow: inset 0 0 0 1.5px var(--primary); }
+    @media (hover: hover) { button.cm-day.sel:hover { background: var(--glass-2); } }
+    .cm-day.sel .dot { background: var(--text-2); } .cm-day.sel .dot-inc { background: var(--income); } .cm-day.sel .dot-bday { background: var(--warn); } .cm-day.sel .dot-ev { background: var(--link); }
+    .cm-day.sel .dot-goal { background: transparent; box-shadow: inset 0 0 0 1.5px var(--primary); }
+    .cm-day.sel .cd-more { color: var(--text-2); }
+    .cm-day.sel.today .cd-num { box-shadow: inset 0 0 0 1.5px var(--primary); }
+  }
+  /* Лист события и цели: на компьютере — панель справа 420 на всю высоту */
+  .m-handle { display: none; }
+  @media (max-width: 1024px) {
+    .modal.side { max-height: 92vh; background: var(--sheet-solid, var(--glass-strong)); }
+    .modal.side .modal-head { position: relative; padding-top: 8px; }
+    .modal.side .m-handle { display: block; position: absolute; top: -4px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 999px; background: var(--border-strong); }
+  }
+  @media (min-width: 1025px) {
+    .modal.side { top: 0; bottom: 0; right: 0; left: auto; width: 420px; max-width: none; max-height: none; height: 100%; transform: none; border-radius: 24px 0 0 24px; padding: 20px 24px 24px; }
+  }
+  .modal .modal-head h2 { font-size: 17px; }
+  .ev-hero { display: flex; align-items: center; gap: 16px; margin: 8px 0 16px; }
+  .ev-hico { display: flex; align-items: center; justify-content: center; flex: none; width: 48px; height: 48px; border-radius: 14px; background: var(--glass-2); font-size: 24px; }
+  .ev-htext { min-width: 0; }
+  .ev-htitle, .ev-hsum { font-size: 22px; line-height: 28px; font-weight: 300; overflow-wrap: anywhere; }
+  .ev-rows { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; margin: 0 0 16px; }
+  .ev-rows dt, .ev-rows dd { margin: 0; padding: 10px 0; border-bottom: 1px solid var(--glass-2-border); font-size: 15px; line-height: 20px; }
+  .ev-rows dt { color: var(--text-2); }
+  .ev-rows dd { text-align: right; }
+  .ev-btns { display: flex; flex-direction: column; gap: 8px; }
+  .ev-btns > button:first-child { min-height: 52px; }
+  .ev-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ev-pair button[hidden] { display: none; }
+  .ev-pair:has(button[hidden]) { grid-template-columns: 1fr; }
+  button.soft { background: var(--glass-2); color: var(--text); min-height: 48px; }
+  @media (hover: hover) { button.soft:hover { background: var(--surface-3); } }
+  .ev-del { align-self: center; margin-top: 4px; }
+  .ev-del[hidden], .goal-pause[hidden] { display: none; }
+  .ev-kinds { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 16px; }
+  .ev-kinds[hidden], .ev-icons[hidden], #evTitleBox[hidden], #evCatBox[hidden], #evAccBox[hidden], #evRepeatBox[hidden], .ev-goal-line[hidden], #goalSavedBox[hidden] { display: none; }
+  .ev-kinds button { display: flex; align-items: center; justify-content: center; gap: 8px; height: 52px; min-height: 52px; padding: 0 8px; border-radius: 16px; background: var(--glass-2); color: var(--text); font-size: 15px; white-space: nowrap; }
+  .ev-kinds button span { font-size: 20px; line-height: 20px; }
+  .ev-kinds button[aria-pressed="true"] { background: var(--seg-on); color: var(--seg-on-text); }
+  .ev-goal-line { margin: 4px 0 16px; font-size: 17px; font-weight: 500; }
+  .ev-icons { display: flex; flex-wrap: wrap; gap: 8px; margin: -4px 0 12px; }
+  .ev-icons button, .goal-icons button { width: 44px; height: 44px; min-height: 44px; padding: 0; border-radius: 14px; background: var(--glass-2); font-size: 20px; }
+  .ev-icons button[aria-pressed="true"], .goal-icons button[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--primary); background: var(--surface); }
+  .modal .amount-field.ev-amount { margin-bottom: 12px; }
+  .modal .amount-field.ev-amount input { margin: 0; }
+  .ev-remind { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .ev-remind button { position: relative; height: 36px; min-height: 36px; padding: 0 14px; background: var(--glass-2); color: var(--text); font-size: 14px; margin: 4px 0; }
+  .ev-remind button::before { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; }
+  .ev-remind button[aria-pressed="true"] { background: var(--seg-on); color: var(--seg-on-text); }
+  .modal .select { display: block; margin-bottom: 12px; }
+  .ev-foot { position: sticky; bottom: calc(-20px - env(safe-area-inset-bottom)); margin: 8px -20px 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: inherit; }
+  .ev-foot button { width: 100%; min-height: 52px; }
+  @media (min-width: 1025px) { .ev-foot { bottom: -24px; margin: 8px -24px 0; padding: 12px 24px 24px; } }
+  .goal-icons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 4px 0 16px; }
+  .goal-icons button { width: 100%; height: 52px; min-height: 52px; }
+  .goal-date { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .goal-date input[type="date"] { flex: 1; min-width: 0; margin: 0; }
+  .goal-nodate { display: flex; align-items: center; gap: 8px; min-height: 44px; margin: 0; color: var(--text); font-size: 15px; white-space: nowrap; cursor: pointer; }
+  .modal .goal-nodate input { width: 22px; height: 22px; margin: 0; accent-color: var(--primary); }
+  .goal-prio { margin-bottom: 12px; height: 44px; }
+  .goal-pause { width: 100%; margin-top: 8px; }
+  .fix-card { padding: 16px; margin-bottom: 12px; border-radius: 20px; background: var(--glass-2); }
+  .fix-card p { margin: 0 0 12px; font-size: 15px; line-height: 22px; }
+  .fix-card button { width: 100%; }
+  .fix-keep { display: block; margin: 0 auto; min-height: 44px; }
+  /* Цели */
+  .goals-pane { display: flex; flex-direction: column; gap: 12px; }
+  .goals-pane > .card { margin: 0; }
+  .goals-sum { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .goals-sum[hidden], .goals-empty[hidden], .gp-label[hidden] { display: none; }
+  .gs-label { font-size: 15px; font-weight: 500; }
+  .gs-val { font-size: 30px; line-height: 36px; font-weight: 300; white-space: nowrap; }
+  .gs-side { display: flex; align-items: center; gap: 8px; color: var(--text-2); font-size: 13px; }
+  .gs-side button.link { min-height: 44px; }
+  .goals-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .goals-grid:empty { display: none; }
+  .gp-label { margin-top: 4px; font-size: 13px; font-weight: 500; color: var(--text-2); }
+  .goal-card { display: flex; flex-direction: column; margin: 0; min-width: 0; }
+  .gc-head { display: flex; align-items: center; gap: 12px; }
+  .gc-ico { display: flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border-radius: 14px; background: var(--glass-2); font-size: 22px; }
+  .gc-name { flex: 1; min-width: 0; }
+  .gc-title { margin: 0; font-size: 17px; line-height: 22px; font-weight: 500; overflow-wrap: anywhere; }
+  .gc-term { font-size: 13px; line-height: 18px; color: var(--text-2); }
+  .gc-chip { flex: none; height: 22px; padding: 0 8px; border-radius: 11px; background: var(--glass-2); color: var(--text-2); font-size: 12px; line-height: 22px; font-weight: 500; }
+  .gc-pct { flex: none; font-size: 15px; font-weight: 500; }
+  .gc-sum { margin: 12px 0 8px; font-size: 15px; line-height: 20px; }
+  .gc-bar { height: 8px; border-radius: 4px; background: var(--glass-2); overflow: hidden; }
+  .gc-fill { height: 100%; border-radius: 4px; background: var(--primary); }
+  .goal-card.reached .gc-fill { background: var(--income); }
+  .goal-card.paused .gc-fill { background: var(--text-3); }
+  .gc-lines { margin-top: 8px; font-size: 13px; line-height: 18px; color: var(--text-2); }
+  .gc-lines > div { margin-top: 4px; }
+  .gc-done { color: var(--income); font-weight: 500; }
+  .gc-late { color: var(--warn-text); font-weight: 500; }
+  button.gc-fix { min-height: 44px; padding: 0; }
+  .gc-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 12px; }
+  button.gc-add { min-height: 44px; height: 44px; padding: 0 16px; border-radius: 22px; background: var(--glass-2); color: var(--text); }
+  @media (hover: hover) { button.gc-add:hover { background: var(--surface-3); } }
+  button.gc-more { width: 44px; height: 44px; min-height: 44px; margin-left: auto; color: var(--text-2); }
+  .goals-empty { text-align: center; }
+  .ge-ico { font-size: 48px; line-height: 56px; }
+  .goals-empty p { margin: 8px 0 16px; color: var(--text-2); font-size: 15px; line-height: 22px; }
+  .goals-empty .cu-tpls { justify-content: center; margin-top: 12px; }
+  @media (min-width: 1025px) {
+    .goals-sum { flex-wrap: nowrap; }
+    .goals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 16px; }
+    .goals-pane { gap: 16px; }
+  }
+  /* Форма: «Взнос в цель» */
+  .goal-row { display: flex; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 12px; }
+  .goal-row[hidden], .goal-hint[hidden], #goalSelBox[hidden], .goal-one[hidden] { display: none; }
+  .goal-row .f-label { margin: 0; flex: none; }
+  .goal-row .select { flex: 1; min-width: 0; }
+  .goal-one { font-size: 17px; font-weight: 500; }
+  .goal-hint { margin: 8px 0 0; font-size: 13px; }
+  .sheet.goal-mode #comment { display: none; }
+  @media (max-width: 1024px) { .sheet.goal-mode .date-row { display: none; } }
+  .type-switch[hidden] { display: none; }
+  /* «Операции»: взнос — без знака, цветом текста */
+  .op .sum.goal { color: var(--text); }
+  .goal-op .ico { background: var(--glass-2); }
+  /* Меню «＋»: разделитель и строки «Событие», «Взнос в цель» */
+  .add-menu { width: 240px; }
+  .add-menu .am-sep { height: 1px; margin: 4px; background: var(--glass-border); }
+  .add-menu .am-ico svg { display: block; }
+  .add-menu button[hidden] { display: none; }
+  /* Плашки календаря на Главной (17.25.5) */
+  .plan-banners { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; }
+  .plan-banners[hidden] { display: none; }
+  .plan-banner {
+    display: grid; grid-template-columns: 22px minmax(0, 1fr) auto 44px; align-items: center; column-gap: 12px; padding: 12px 4px 12px 16px;
+    border-radius: 20px; background: var(--glass); border: 1px solid var(--glass-border); box-shadow: inset 4px 0 0 var(--link), var(--glass-highlight);
+  }
+  .plan-banner.pb-birthday { box-shadow: inset 4px 0 0 var(--warn), var(--glass-highlight); }
+  .plan-banner.pb-goal { box-shadow: inset 4px 0 0 var(--primary), var(--glass-highlight); }
+  .pb-ico { font-size: 20px; line-height: 22px; text-align: center; }
+  .pb-text { min-width: 0; }
+  .pb-title { font-size: 15px; line-height: 20px; font-weight: 500; overflow-wrap: anywhere; }
+  .pb-sub { font-size: 13px; line-height: 18px; color: var(--text-2); }
+  .plan-banner .pb-go { position: relative; height: 36px; min-height: 36px; padding: 0 14px; font-size: 14px; white-space: nowrap; }
+  .plan-banner .pb-go::before { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; }
+  .plan-banner .pb-later { width: 44px; height: 44px; min-height: 44px; color: var(--text-2); }
+  button.pb-more { align-self: flex-start; min-height: 44px; font-size: 13px; }
+  @media (max-width: 400px) {
+    .plan-banner { grid-template-columns: 22px minmax(0, 1fr) 44px; row-gap: 8px; }
+    .plan-banner .pb-go { grid-column: 2; grid-row: 2; justify-self: start; }
+    .plan-banner .pb-later { grid-column: 3; grid-row: 1; }
+  }
+  @media (min-width: 1025px) { .plan-banners { flex-direction: row; flex-wrap: wrap; align-items: center; margin-bottom: 16px; } .plan-banner { flex: 1 1 360px; } }
 </style>
 </head>
 <body>
@@ -1627,6 +1890,8 @@
         <button type="button" class="ghost" id="corruptDownload"><svg class="dl-ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v10.5"/><path d="M7.5 10 12 14.5 16.5 10"/><path d="M5 14.5V19h14v-4.5"/></svg> Скачать повреждённые данные</button>
       </div>
     </section>
+    <!-- Плашки календаря (17.25.5): не больше двух, остальные — «Ещё N напоминаний ›» -->
+    <div class="plan-banners" id="planBanners" hidden></div>
     <div class="dash" id="dash">
       <!-- Общий баланс и график по месяцам (13.20) -->
 
@@ -1714,7 +1979,7 @@
         </div>
         <div class="f-row">
         <span class="f-sel"><span class="select"><select id="filterType" aria-label="Тип" data-empty="Тип">
-          <option value="">Все типы</option><option value="expense">Расходы</option><option value="income">Доходы</option><option value="transfer">Переводы</option>
+          <option value="">Все типы</option><option value="expense">Расходы</option><option value="income">Доходы</option><option value="transfer">Переводы</option><option value="goal">Взносы</option>
         </select></span><button type="button" class="icon f-clear" data-clear="filterType" aria-label="Сбросить тип" title="Сбросить" hidden>✕</button></span>
         <span class="f-sel"><span class="select"><select id="filterCategory" aria-label="Категория" data-empty="Категория"></select></span><button type="button" class="icon f-clear" data-clear="filterCategory" aria-label="Сбросить категорию" title="Сбросить" hidden>✕</button></span>
         <button type="button" class="pill-btn day-chip" id="filterDayChip" hidden aria-label="Сбросить фильтр по дню"></button>
@@ -1732,9 +1997,67 @@
 
     <section class="screen" id="screen-budget" data-screen="budget" hidden>
       <h1>План</h1>
-      <!-- Разделы «Плана» (design.md 14): «Календарь · Бюджеты · Цели»; пока сделаны только «Бюджеты» -->
-      <div class="segmented plan-tabs" role="tablist" aria-label="Разделы плана" hidden>
+      <!-- Разделы «Плана» (17.25.1): «Календарь · Бюджеты · Цели», последний выбор запоминается -->
+      <div class="segmented plan-tabs" id="planTabs" role="radiogroup" aria-label="Разделы плана">
+        <label><input type="radio" name="plan" value="calendar"><span>Календарь</span></label>
         <label><input type="radio" name="plan" value="budgets" checked><span>Бюджеты</span></label>
+        <label><input type="radio" name="plan" value="goals"><span>Цели</span></label>
+      </div>
+      <!-- Календарь (17.25.2, 17.25.6): сводка, месяц, ближайшие -->
+      <div class="cal-layout" id="paneCalendar" hidden>
+        <section class="card cal-month" id="calMonth" aria-labelledby="cmTitle">
+          <div class="cm-head" id="cmHead">
+            <button type="button" class="icon cm-nav" id="cmPrev" aria-label="Предыдущий месяц" title="Предыдущий месяц"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 6l-6 6 6 6"/></svg></button>
+            <button type="button" class="cm-title" id="cmTitle" aria-haspopup="dialog" aria-expanded="false" aria-controls="monthPicker"></button>
+            <button type="button" class="icon cm-nav" id="cmNext" aria-label="Следующий месяц" title="Следующий месяц"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 6l6 6-6 6"/></svg></button>
+            <button type="button" class="link cm-today" id="cmToday" hidden>Сегодня</button>
+          </div>
+          <div class="cm-wd" aria-hidden="true"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div>
+          <div class="cm-grid" id="cmGrid" role="group" aria-label="Дни месяца"></div>
+        </section>
+        <div class="cal-side">
+          <div class="cal-side-in">
+            <section class="card cal-sum" id="calSum" aria-label="Сводка месяца">
+              <div class="cs-row">
+                <div class="cs-col"><div class="cs-label" id="csLabel"></div><div class="cs-val num" id="csOblig"></div></div>
+                <div class="cs-col cs-right"><div class="cs-label">ожидается</div><div class="cs-val num income" id="csIncome"></div></div>
+              </div>
+              <div class="cs-note num" id="csNote" hidden></div>
+            </section>
+            <section class="card cal-up" id="calUp" aria-labelledby="cuTitle">
+              <div class="card-head cu-head"><h2 id="cuTitle">Ближайшие</h2><span class="cu-btns"><button type="button" class="link" id="cuAll" hidden>Все ›</button><button type="button" class="link" id="cuAdd">＋ Событие</button></span></div>
+              <ul class="ev-list" id="cuList"></ul>
+              <div class="cu-none" id="cuNone" hidden></div>
+              <div class="cu-empty" id="cuEmpty" hidden>
+                <p>Здесь будут платежи, зарплата и дни рождения — приложение напомнит заранее</p>
+                <div class="cu-tpls">
+                  <button type="button" class="tpl-chip" data-tpl="regular">＋ Аренда</button>
+                  <button type="button" class="tpl-chip" data-tpl="salary">＋ Зарплата</button>
+                  <button type="button" class="tpl-chip" data-tpl="birthday">＋ День рождения</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+      <!-- Цели (17.25.7) -->
+      <div class="goals-pane" id="paneGoals" hidden>
+        <section class="card goals-sum" id="goalsSum" aria-label="Копилки">
+          <div class="gs-main"><div class="gs-label">Копилки</div><div class="gs-val num" id="gsTotal"></div></div>
+          <div class="gs-side"><span class="gs-note" id="gsNote"></span><button type="button" class="link" id="gsAdd">＋ Цель</button></div>
+        </section>
+        <div class="goals-grid" id="goalsGrid"></div>
+        <div class="gp-label" id="goalsPausedLabel" hidden>На паузе</div>
+        <div class="goals-grid" id="goalsPaused"></div>
+        <section class="card goals-empty" id="goalsEmpty" hidden>
+          <div class="ge-ico" aria-hidden="true">🐷</div>
+          <p>Копите на отпуск, технику или резерв — приложение посчитает, сколько откладывать</p>
+          <button type="button" id="goalsAdd">＋ Цель</button>
+          <div class="cu-tpls">
+            <button type="button" class="tpl-chip" data-goal-tpl="trip">＋ Отпуск</button>
+            <button type="button" class="tpl-chip" data-goal-tpl="reserve">＋ Резервный фонд</button>
+          </div>
+        </section>
       </div>
         <!-- Экран «Бюджеты»: неделя, график, лимиты, «По категориям» -->
         <div class="pair" id="pair">
@@ -1923,6 +2246,78 @@
       <button type="button" class="secondary" id="tplCancel">Отмена</button>
     </div>
   </section>
+  <!-- Лист «Событие» / «Новое событие» (17.25.3): на телефоне лист снизу, на компьютере панель справа 420 -->
+  <section class="modal side ev-modal" id="evModal" role="dialog" aria-modal="true" aria-labelledby="evH" hidden>
+    <div class="modal-head"><span class="m-handle" aria-hidden="true"></span><h2 id="evH">Событие</h2><button type="button" class="icon modal-close" aria-label="Закрыть" title="Закрыть">✕</button></div>
+    <div id="evView">
+      <div class="ev-hero"><span class="ev-hico" id="evHico" aria-hidden="true"></span><div class="ev-htext"><div class="ev-htitle" id="evHtitle"></div><div class="ev-hsum num" id="evHsum"></div></div></div>
+      <dl class="ev-rows" id="evRows"></dl>
+      <div class="ev-btns">
+        <button type="button" id="evMain">Записать</button>
+        <div class="ev-pair"><button type="button" class="soft" id="evSkip">Пропустить раз</button><button type="button" class="soft" id="evEdit">Изменить</button></div>
+        <button type="button" class="link danger ev-del" id="evDelete">Удалить событие</button>
+      </div>
+    </div>
+    <div id="evForm" hidden>
+      <div class="ev-kinds" id="evKinds" role="group" aria-label="Вид">
+        <button type="button" data-kind="regular" aria-pressed="true"><span aria-hidden="true">🔁</span>Платёж</button>
+        <button type="button" data-kind="salary" aria-pressed="false"><span aria-hidden="true">💼</span>Доход</button>
+        <button type="button" data-kind="birthday" aria-pressed="false"><span aria-hidden="true">🎂</span>День рождения</button>
+        <button type="button" data-kind="event" aria-pressed="false"><span aria-hidden="true">✨</span>Событие</button>
+      </div>
+      <div class="ev-goal-line" id="evGoalLine" hidden></div>
+      <div id="evTitleBox"><label for="evTitle" id="evTitleLabel">Название</label><input id="evTitle" maxlength="60" autocomplete="off" enterkeyhint="done"></div>
+      <div class="ev-icons" id="evIcons" role="group" aria-label="Значок события" hidden>
+        <button type="button" aria-pressed="true">✨</button><button type="button" aria-pressed="false">✈️</button><button type="button" aria-pressed="false">💍</button><button type="button" aria-pressed="false">🎉</button><button type="button" aria-pressed="false">🎓</button><button type="button" aria-pressed="false">🏥</button>
+      </div>
+      <label for="evAmount" id="evAmountLabel">Сумма</label>
+      <div class="amount-field ev-amount"><input id="evAmount" class="num" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="0" aria-describedby="evError"><span class="cur" aria-hidden="true">₽</span></div>
+      <div id="evCatBox"><label for="evCat">Категория</label><span class="select"><select id="evCat"></select></span></div>
+      <div id="evAccBox"><label for="evAcc">Счёт</label><span class="select"><select id="evAcc"></select></span></div>
+      <label for="evDate" id="evDateLabel">Дата</label>
+      <input type="date" id="evDate" class="ev-date">
+      <div id="evRepeatBox"><label for="evRepeat">Повтор</label><span class="select"><select id="evRepeat">
+        <option value="">Нет</option><option value="week">Каждую неделю</option><option value="month">Каждый месяц</option><option value="year">Каждый год</option>
+      </select></span></div>
+      <div class="f-label" id="evRemindLabel">Напомнить</div>
+      <div class="ev-remind" id="evRemind" role="group" aria-labelledby="evRemindLabel">
+        <button type="button" data-d="0" aria-pressed="false">в день</button><button type="button" data-d="1" aria-pressed="false" aria-label="за 1 день">1</button><button type="button" data-d="3" aria-pressed="false" aria-label="за 3 дня">3</button><button type="button" data-d="7" aria-pressed="false" aria-label="за 7 дней">7</button><button type="button" data-d="14" aria-pressed="false" aria-label="за 14 дней">14 дн.</button>
+      </div>
+      <div class="error" id="evError" role="alert" hidden></div>
+      <div class="ev-foot"><button type="button" id="evSave">Сохранить событие</button></div>
+    </div>
+  </section>
+  <!-- Лист «Цель» (15.7, 17.25.7) -->
+  <section class="modal side goal-modal" id="goalModal" role="dialog" aria-modal="true" aria-labelledby="goalH" hidden>
+    <div class="modal-head"><span class="m-handle" aria-hidden="true"></span><h2 id="goalH">Новая цель</h2><button type="button" class="icon modal-close" aria-label="Закрыть" title="Закрыть">✕</button></div>
+    <div class="goal-icons" id="goalIcons" role="group" aria-label="Значок цели">
+      <button type="button">✈️</button><button type="button">💻</button><button type="button">🏠</button><button type="button">🚗</button><button type="button">🛡</button><button type="button">🎁</button><button type="button">🎓</button><button type="button">💍</button>
+    </div>
+    <label for="goalName">Название</label>
+    <input id="goalName" maxlength="40" autocomplete="off" placeholder="Например, Путешествие" enterkeyhint="done">
+    <label for="goalTarget">Сколько нужно, ₽</label>
+    <input id="goalTarget" class="num" inputmode="decimal" autocomplete="off" placeholder="100 000" aria-describedby="goalError">
+    <label for="goalDate">Срок</label>
+    <div class="goal-date"><input type="date" id="goalDate"><label class="goal-nodate"><input type="checkbox" id="goalNoDate"><span>Без срока</span></label></div>
+    <div id="goalSavedBox"><label for="goalSaved">Уже накоплено, ₽ (необязательно)</label><input id="goalSaved" class="num" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+    <div class="f-label" id="goalPrioLabel">Приоритет</div>
+    <div class="segmented goal-prio" id="goalPrio" role="radiogroup" aria-labelledby="goalPrioLabel">
+      <label><input type="radio" name="goalPrio" value="1"><span>Высокий</span></label>
+      <label><input type="radio" name="goalPrio" value="2" checked><span>Средний</span></label>
+      <label><input type="radio" name="goalPrio" value="3"><span>Низкий</span></label>
+    </div>
+    <div class="error" id="goalError" role="alert" hidden></div>
+    <div class="ev-foot"><button type="button" id="goalSaveBtn">Сохранить цель</button></div>
+    <button type="button" class="soft goal-pause" id="goalPause" hidden>Поставить на паузу</button>
+    <button type="button" class="link danger ev-del" id="goalDelete" hidden>Удалить цель</button>
+  </section>
+  <!-- «Что можно сделать» (15.6) -->
+  <section class="modal fix-modal" id="fixModal" role="dialog" aria-modal="true" aria-labelledby="fixH" hidden>
+    <div class="modal-head"><h2 id="fixH">Что можно сделать</h2><button type="button" class="icon modal-close" aria-label="Закрыть" title="Закрыть">✕</button></div>
+    <div class="fix-card"><p id="fixPayText"></p><button type="button" id="fixPay">Изменить взнос</button></div>
+    <div class="fix-card"><p id="fixDateText"></p><button type="button" class="soft" id="fixDate">Перенести срок</button></div>
+    <button type="button" class="link fix-keep" id="fixKeep">Оставить как есть</button>
+  </section>
   <div class="mini-menu" id="miniMenu" role="menu" hidden></div>
   <!-- Меню «＋» (17.22.2): расход, доход, перевод -->
   <div class="add-scrim" id="addScrim" hidden></div>
@@ -1930,6 +2325,9 @@
     <button type="button" role="menuitem" data-add="expense" class="am-exp"><span class="am-ico" aria-hidden="true">−</span>Расход</button>
     <button type="button" role="menuitem" data-add="income" class="am-inc"><span class="am-ico" aria-hidden="true">+</span>Доход</button>
     <button type="button" role="menuitem" data-add="transfer"><span class="am-ico" aria-hidden="true">⇄</span>Перевод</button>
+    <div class="am-sep" role="separator"></div>
+    <button type="button" role="menuitem" id="amEvent"><span class="am-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span>Событие</button>
+    <button type="button" role="menuitem" id="amGoal" hidden><span class="am-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11.5c0-3.6-3.1-6-7-6-1.6 0-3 .4-4.2 1.1L5.5 5.5l.6 3A5.6 5.6 0 0 0 5 11.5H3.5v3H5.4c.6 1.3 1.6 2.3 2.8 3l-.2 2.5h3l.3-1.6c.5.1 1 .1 1.5.1s1-.1 1.5-.1l.3 1.6h3l-.2-2.6c1.6-1 2.6-2.5 2.6-4.4z"/><path d="M15.5 10.5h.01M10 7.5h3"/></svg></span>Взнос в цель</button>
   </div>
   <!-- Ввод операции: лист снизу на телефоне и планшете, закреплённая колонка справа на компьютере (13.10, 13.12) -->
   <div class="scrim" id="scrim" hidden></div>
@@ -1949,6 +2347,8 @@
           <button type="button" class="exp active" data-type="expense" aria-pressed="true"><span>− Расход</span></button>
           <button type="button" class="trf" data-type="transfer" aria-pressed="false"><span>⇄ Перевод</span></button>
         </div>
+        <!-- 17.25.7: «Взнос в цель» — та же форма, вместо переключателя типа строка «В цель» -->
+        <div class="goal-row" id="goalRow" hidden><span class="f-label" id="goalRowLabel">В цель</span><span class="select goal-select" id="goalSelBox"><select id="goalSelect" aria-labelledby="goalRowLabel"></select></span><span class="goal-one" id="goalOne"></span></div>
         <div class="hint trf-need" id="trfNeed" hidden>Добавьте второй счёт, чтобы переводить <button type="button" class="link" id="trfAddAcc">Добавить счёт</button></div>
         <!-- «Частое» (14.5): шаблоны над суммой, не больше 8 -->
         <div class="tpl-lane" id="tplLane" role="group" aria-label="Частое" hidden></div>
@@ -1958,6 +2358,7 @@
           <span class="cur" id="amountCur" aria-hidden="true">₽</span>
         </div>
         <div class="error" id="formError" role="alert" hidden></div>
+        <div class="hint goal-hint" id="goalHint" hidden></div>
         <!-- Перевод (14.4): «Откуда» и «Куда» вместо категории -->
         <div class="transfer-fields" id="transferFields" hidden>
           <div class="tf"><label for="fromAcc">Откуда</label><span class="select"><select id="fromAcc"></select></span></div>
@@ -1983,7 +2384,7 @@
         </div>
         <!-- Счёт (14.3): только при 2 и больше счетах -->
         <div class="acc-field" id="accField" hidden>
-          <label for="accountSelect" class="f-label">Счёт</label>
+          <label for="accountSelect" class="f-label" id="accLabel">Счёт</label>
           <span class="select acc-select"><select id="accountSelect"></select></span>
         </div>
         <div class="date-row">
@@ -2219,7 +2620,7 @@
     }
     ops.push({ id: "demo-t1", type: "transfer", amount: 1000000, category: "", accountId: "demo-card", toAccountId: "demo-cash", date: d(0, 2), comment: "" });
     var bday = new Date(t.getFullYear(), t.getMonth(), t.getDate() + 10);
-    return normalize({
+    var demo = normalize({
       version: SCHEMA_VERSION,
       accounts: [{ id: "demo-card", name: "Карта", kind: "card", currency: "RUB", startBalance: 4500000, archived: false },
                  { id: "demo-cash", name: "Наличные", kind: "cash", currency: "RUB", startBalance: 300000, archived: false },
@@ -2239,6 +2640,10 @@
       customCategories: { expense: [], income: [] },
       settings: { thresholds: [70, 85, 100], notify: {}, rates: { USD: 92 }, ratesDate: todayStr() }
     }, {});
+    // 17.25: в примере прошедшие платежи уже записаны — иначе зарплата и аренда висят «просроченными»
+    var today = ymd(t);
+    demo.plans.forEach(function (p) { planDates(p, addDays(today, -40), addDays(today, -1)).forEach(function (x) { p.marks[x] = "done"; }); });
+    return demo;
   }
 
   // Приводит данные к схеме 2. Принимает схему 1 (без version: limits, операции без счёта) и схему 2.
@@ -2321,8 +2726,9 @@
         if (!monthBudget(result, c)) result.budgets.push({ id: makeId(), category: c, period: "month", amount: Math.round(data.limits[c]), carryOver: false });
       });
     }
-    result.plans = objectList(data.plans, report);
-    result.goals = objectList(data.goals, report);
+    // 17.25: пункты плана и цели проверяются, плохие записи — в отложенные (как операции)
+    result.plans = cleanList(data.plans, cleanPlan, accIds, report);
+    result.goals = cleanList(data.goals, cleanGoal, accIds, report);
     result.templates = objectList(data.templates, report);
     var st = data.settings && typeof data.settings === "object" ? data.settings : {};
     result.settings = JSON.parse(JSON.stringify(st));
@@ -2473,9 +2879,11 @@
   var amtObs = new MutationObserver(amtRecords);
   amtObs.observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["aria-label", "title"] });
   function flushAmt() { amtRecords(amtObs.takeRecords()); }
-  function money(kopecks) { return amt(moneyFormat.format(kopecks / 100)); }
+  // З5 (17.24): у отрицательных — минус «−», а не дефис, который даёт Intl
+  function minus(t) { return t.replace("-", "\u2212"); }
+  function money(kopecks) { return amt(minus(moneyFormat.format(kopecks / 100))); }
   var numberFormat = new Intl.NumberFormat("ru-RU", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-  function number(kopecks) { return amt(numberFormat.format(kopecks / 100)); }
+  function number(kopecks) { return amt(minus(numberFormat.format(kopecks / 100))); }
   // В7 (17.21): знак — внутри размытой суммы, иначе «−» уходил отдельной строкой
   function signedMoney(kopecks, type, cur) {
     var sign = type === "income" ? "+" : "−", m = curMoney(kopecks, cur);
@@ -2487,7 +2895,7 @@
     var fc = accCurrency(op.accountId), tc = accCurrency(op.toAccountId);
     return fc === tc ? curMoney(op.amount, fc) : curMoney(op.amount, fc) + " → " + curMoney(op.toAmount || op.amount, tc);
   }
-  function curMoney(kopecks, cur) { return !cur || cur === "RUB" ? money(kopecks) : amt(numberFormat.format(kopecks / 100) + "\u00a0" + CUR_SIGN[cur]); }
+  function curMoney(kopecks, cur) { return !cur || cur === "RUB" ? money(kopecks) : amt(minus(numberFormat.format(kopecks / 100)) + "\u00a0" + CUR_SIGN[cur]); }
 
   function pad(n) { return (n < 10 ? "0" : "") + n; }
   function todayStr() { var d = new Date(); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
@@ -2536,6 +2944,10 @@
     renderLimitInputs();
     renderBudget();
     renderBell();
+    renderPlanBanners();
+    $("amGoal").hidden = !liveGoals().some(function (g) { return !g.paused; });
+    renderPlanCal(); // оба раздела всегда свежие: иначе в скрытом остаются старые суммы (👁)
+    renderGoals();
   }
 
   function plural(n, one, few, many) {
@@ -2552,6 +2964,7 @@
     var t = today || Date.now(), list = [];
     if (newerRaw !== null) list.push({ kind: "newer", level: "red", el: "newerBanner" });
     if (corrupted.length) list.push({ kind: "corrupt", level: "red", el: "corruptBanner" });
+    planBanners(ymd(new Date(t))).forEach(function (b) { list.push(b); }); // 17.25.5: «Пора записать», день рождения, взнос
     return list;
   }
   function renderBanners() {
@@ -2616,6 +3029,10 @@
       if (date && op.date > date) return;
       if (op.type === "transfer") { by[op.accountId] -= op.amount; by[op.toAccountId] += op.toAmount || op.amount; return; }
       by[op.accountId] += op.type === "income" ? op.amount : -op.amount;
+    });
+    // Взнос в цель — не расход, но деньги ушли со счёта в копилку (15.5); «Забрать» — вернулись
+    state.goals.forEach(function (g) {
+      g.contributions.forEach(function (c) { if (c.accountId && c.accountId in by && (!date || c.date <= date)) by[c.accountId] -= c.amount; });
     });
     var active = 0;
     state.accounts.forEach(function (a) { var r = toRub(by[a.id], a.currency); total += r; if (!a.archived) active += r; });
@@ -2917,7 +3334,7 @@
       var go = document.createElement("span"); go.setAttribute("aria-hidden", "true"); go.textContent = "›";
       b.appendChild(go);
       b.addEventListener("click", function () {
-        if (isNarrow()) goTo("budget");
+        if (isNarrow()) { planSub = "budgets"; goTo("budget"); }
         else $("budgetList").scrollIntoView({ behavior: scrollBehavior(), block: "center" });
       });
       box.appendChild(b);
@@ -3220,6 +3637,7 @@
     renderAccountFields();
     renderTplLane();
     $("saveTplBtn").hidden = trf || !!editingId;
+    applyGoalMode();
     renderDatePills();
   }
   // Счета в форме: строка «Счёт» (2+ счёта) или «Откуда / Куда» у перевода
@@ -3426,6 +3844,7 @@
       text = "Добавить " + (currentType === "income" ? "доход" : "расход") + when +
              (activeAccounts().length > 1 && acc !== rememberedAcc(currentType) ? " · " + accountName(acc) : "");
     }
+    if (goalMode) text = goalSubmitText();
     if ($("submitBtn").textContent !== text) $("submitBtn").textContent = text;
   }
 
@@ -3591,6 +4010,9 @@
     var period = selectedPeriod();
     var ops = period === "month" ? monthOps() : state.operations.slice();
     var f = $("filterCategory").value, fType0 = $("filterType").value, fAcc = $("filterAccount").value;
+    // 17.25.7: взносы в цели — тоже строки истории (🐷), но не расход
+    var curKey = monthKey(viewYear, viewMonth);
+    ops = ops.concat(contribItems().filter(function (it) { return period !== "month" || it.date.slice(0, 7) === curKey; }));
     if (f) {
       var sep = f.indexOf("|");
       var fType = f.slice(0, sep), fCat = f.slice(sep + 1);
@@ -3608,6 +4030,7 @@
       ops = ops.filter(function (op) {
         var accs = (accountName(op.accountId) + " " + (op.toAccountId ? accountName(op.toAccountId) : "")).toLocaleLowerCase("ru");
         return op.comment.toLocaleLowerCase("ru").indexOf(q) !== -1 || op.category.toLocaleLowerCase("ru").indexOf(q) !== -1 ||
+               (op.type === "goal" && op.label.toLocaleLowerCase("ru").indexOf(q) !== -1) ||
                (state.accounts.length > 1 && accs.indexOf(q) !== -1) ||
                (/^\d+(\.\d+)?$/.test(qNum) && String(op.amount / 100).indexOf(qNum) === 0);
       });
@@ -3622,7 +4045,7 @@
     state.operations.forEach(function (op, i) { order[op.id] = i; });
     ops.sort(function (a, b) {
       if (a.date !== b.date) return a.date < b.date ? 1 : -1;
-      return order[b.id] - order[a.id];
+      return (b.id in order ? order[b.id] : -1) - (a.id in order ? order[a.id] : -1);
     });
     $("opsEmpty").hidden = ops.length > 0;
     $("resetFilters").hidden = !filtered;
@@ -3647,7 +4070,7 @@
       head.appendChild(title);
       head.appendChild(total);
       list.appendChild(head);
-      g.ops.forEach(function (op, i) { list.appendChild(renderOp(op, i === g.ops.length - 1)); });
+      g.ops.forEach(function (op, i) { list.appendChild(op.type === "goal" ? renderContribOp(op, i === g.ops.length - 1) : renderOp(op, i === g.ops.length - 1)); });
     });
   }
 
@@ -4196,6 +4619,7 @@
     if (amount > MAX_AMOUNT) { showFormError(TOO_BIG_TEXT); return; }
     var date = formDate();
     if (!isValidDate(date)) { showFormError("Выберите дату"); return; }
+    if (goalMode && !editingId) { submitGoal(amount, date); return; }
 
     var trf = currentType === "transfer";
     if (trf && trfFrom === trfTo) { showFormError("Выберите разные счета"); return; }
@@ -4228,6 +4652,8 @@
       return;
     }
     data.id = makeId();
+    var fp = formPlan, fpPlan = fp && !trf && planById(fp.id);
+    if (fpPlan) { data.planId = fpPlan.id; data.planDate = fp.date; setMark(fpPlan, fp.date, "done"); formPlan = null; }
     state.operations.push(data);
     if (!trf) { rememberCat(data.type, data.category); rememberAcc(data.type, data.accountId); currentAcc = null; }
     save();
@@ -4241,6 +4667,12 @@
     renderForm();
     toAmountTouched = false;
     if (trf) toast("Перевод: " + trfAmountText(data) + " · " + accountName(data.accountId) + " → " + accountName(data.toAccountId));
+    else if (fpPlan) toast((data.type === "income" ? "Доход добавлен: " : "Расход добавлен: ") + curMoney(amount, accCurrency(data.accountId)) + " · " + planTitle(fpPlan), "Отменить", function () {
+      var k = state.operations.indexOf(data);
+      if (k !== -1) state.operations.splice(k, 1);
+      setMark(fpPlan, data.planDate, "");
+      save(); render(); toast("Запись отменена");
+    }, 6000);
     else toast((data.type === "income" ? "Доход добавлен: " : "Расход добавлен: ") + curMoney(amount, accCurrency(data.accountId)) + " · " + data.category,
                "В шаблоны", function () { hideUndo(); templateFromOp(data); }, 6000);
     // Лист: «Добавить» его закрывает; Enter из поля оставляет открытым для серии трат (13.10).
@@ -5181,8 +5613,11 @@
     $("monthDot").hidden = now;
     $("monthBtn").setAttribute("aria-label", "Выбрать месяц, сейчас " + full.toLowerCase() + (now ? "" : ", не текущий"));
   }
+  // Панель месяцев одна на всё приложение (17.23.2): 📅 на Главной и «‹ Ноябрь 2026 ›» в календаре (17.25.2)
+  var HOME_MP = { btn: $("monthBtn"), box: null, get: function () { return [viewYear, viewMonth]; }, set: function (y, m) { viewYear = y; viewMonth = m; render(); } };
+  var mpCtx = HOME_MP;
   function renderMonthPicker(focus) {
-    var t = new Date();
+    var t = new Date(), cur = mpCtx.get();
     $("mpYear").textContent = mpYear;
     var grid = $("mpGrid");
     grid.innerHTML = "";
@@ -5191,22 +5626,26 @@
       b.type = "button";
       b.textContent = name;
       b.setAttribute("aria-label", MONTHS[i] + " " + mpYear);
-      b.setAttribute("aria-pressed", String(mpYear === viewYear && i === viewMonth));
+      b.setAttribute("aria-pressed", String(mpYear === cur[0] && i === cur[1]));
       if (mpYear === t.getFullYear() && i === t.getMonth()) b.setAttribute("aria-current", "date");
       b.tabIndex = i === mpFocus ? 0 : -1; // у сетки одна точка Tab
       b.addEventListener("click", function () { chooseMonth(mpYear, i); });
       grid.appendChild(b);
     });
-    $("mpNow").hidden = isNowMonth(viewYear, viewMonth);
+    $("mpNow").hidden = isNowMonth(cur[0], cur[1]);
     if (focus) grid.children[mpFocus].focus();
   }
-  function openMonthPicker() {
-    if (!$("monthPicker").hidden) { closeMonthPicker(); return; }
+  function openMonthPicker(ctx) {
+    ctx = ctx && ctx.btn ? ctx : HOME_MP;
+    if (!$("monthPicker").hidden) { var same = mpCtx === ctx; closeMonthPicker(!same); if (same) return; }
     if (ddSel) ddClose(true);
     closeAddMenu(true);
-    mpYear = viewYear; mpFocus = viewMonth;
+    mpCtx = ctx;
+    (ctx.box || HOME_MP.btn.parentNode).appendChild($("monthPicker"));
+    var cur = ctx.get();
+    mpYear = cur[0]; mpFocus = cur[1];
     $("monthPicker").hidden = false;
-    $("monthBtn").setAttribute("aria-expanded", "true");
+    ctx.btn.setAttribute("aria-expanded", "true");
     renderMonthPicker(true);
     void $("monthPicker").offsetWidth;
     $("monthPicker").classList.add("show");
@@ -5215,12 +5654,11 @@
     if ($("monthPicker").hidden) return;
     $("monthPicker").hidden = true;
     $("monthPicker").classList.remove("show");
-    $("monthBtn").setAttribute("aria-expanded", "false");
-    if (!silent) $("monthBtn").focus();
+    mpCtx.btn.setAttribute("aria-expanded", "false");
+    if (!silent) mpCtx.btn.focus();
   }
   function chooseMonth(y, m) {
-    viewYear = y; viewMonth = m;
-    render();
+    mpCtx.set(y, m);
     closeMonthPicker();
   }
   // ‹ › листают только показанный год, выбор не меняется
@@ -5253,7 +5691,7 @@
   });
   // Нажатие мимо закрывает (подложки нет)
   document.addEventListener("pointerdown", function (e) {
-    if (!$("monthPicker").hidden && !e.target.closest("#monthPicker") && !e.target.closest("#monthBtn")) closeMonthPicker(true);
+    if (!$("monthPicker").hidden && !e.target.closest("#monthPicker") && !mpCtx.btn.contains(e.target)) closeMonthPicker(true);
   }, true);
   // ---------- Лист ввода (13.10) ----------
   // «+»: курсор в сумму прямо в обработчике нажатия, без задержек — иначе iPhone не откроет клавиатуру
@@ -5301,8 +5739,10 @@
       openSheet({ type: type });
     });
   });
+  $("amEvent").addEventListener("click", function () { closeAddMenu(true); openEventNew({ kind: "regular" }, addOpener); });
+  $("amGoal").addEventListener("click", function () { closeAddMenu(true); openGoalForm(null, "in"); });
   $("addMenu").addEventListener("keydown", function (e) {
-    var items = [].slice.call($("addMenu").children), i = items.indexOf(document.activeElement);
+    var items = [].filter.call($("addMenu").children, function (b) { return b.tagName === "BUTTON" && !b.hidden; }), i = items.indexOf(document.activeElement);
     if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); closeAddMenu(); }
     else if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); items[(i + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus(); }
     else if (e.key === "Home" || e.key === "End") { e.preventDefault(); items[e.key === "Home" ? 0 : items.length - 1].focus(); }
@@ -5332,6 +5772,10 @@
       $("sheet").setAttribute("role", "dialog");
       $("sheet").setAttribute("aria-modal", "true");
     }
+    // 17.25: «Записать» из плана помнит пункт плана; «Взнос в цель» — режим формы
+    if (!prefill.goal) goalMode = null;
+    formPlan = prefill.planId ? { id: prefill.planId, date: prefill.planDate } : null;
+    if (prefill.goal) { if (prefill.date && isValidDate(prefill.date)) setFormDate(prefill.date); renderForm(); if (focusAmount) $("amount").focus({ preventScroll: true }); return; }
     // Заполняем уже открытую форму: в Safari поля, появившиеся вместе с открытием листа, остаются невидимыми
     if (prefill.type === "income" || prefill.type === "expense" || prefill.type === "transfer") setType(prefill.type);
     if (prefill.accountId && accountById(prefill.accountId) && !accountById(prefill.accountId).archived && currentType !== "transfer") currentAcc = prefill.accountId;
@@ -5368,6 +5812,8 @@
     document.body.classList.remove("sheet-open");
     $("sheet").removeAttribute("role");
     $("sheet").removeAttribute("aria-modal");
+    formPlan = null;
+    if (goalMode) { goalMode = null; $("amount").value = ""; if (!editingId) $("formTitle").textContent = "Новая операция"; renderForm(); }
   }
   // Закрыть «✕», нажатием на затемнение и Esc (Esc в поле даты и «+ Своя» сначала закрывает их)
   $("sheetClose").addEventListener("click", function () { if (editingId) finishEdit(editingId, null); else closeSheet(); });
@@ -5433,6 +5879,9 @@
   // Старые адреса «Ещё» (#more, #more/*) ведут на Главную
   function routeFromHash() {
     var h = location.hash.replace(/^#/, "");
+    // 17.25.1: #plan/calendar · #plan/budgets · #plan/goals (и #calendar) — экран «План» с разделом
+    var pm = /^plan(?:\/(calendar|budgets|goals))?$/.exec(h) || (h === "calendar" ? [h, "calendar"] : null);
+    if (pm) { if (pm[1]) planSub = pm[1]; return "budget"; }
     return SCREENS.indexOf(h) !== -1 ? h : "home";
   }
   function showScreen(name) {
@@ -5451,6 +5900,7 @@
       currentScreen = name;
       if (name === "budget" && !$("limitsCard").hidden) renderLimitInputs(); // помещается ли лимит в поле — меряем на видимом экране
     }
+    if (name === "budget") setPlanSub(planSub, true);
     renderChart(); // размер холста и графика зависит от экрана
     renderFlow();
     if (name === "home") fitHeroSum();
@@ -5643,6 +6093,7 @@
   });
   // «Настроить» — лимиты на месяц прямо на «План → Бюджеты» (17.1), курсор в первое поле
   function goToLimits() {
+    planSub = "budgets"; // 17.25.1: лимиты — в разделе «Бюджеты»
     goTo("budget");
     $("limitsCard").hidden = false;
     renderLimitInputs();
@@ -5692,6 +6143,902 @@
     fitAccounts();
   });
 
+  // ===================== 17.25: Календарь событий (этап 4) и Цели (этап 6) =====================
+  // Данные — architecture.md 3.3: plans (пункты плана) и goals (копилки со взносами). План не пишется в operations до «Записать».
+  var EV_KIND = {
+    regular:  { name: "Платёж", icon: "🔁", type: "expense", dot: "pay" },
+    salary:   { name: "Доход", icon: "💼", type: "income", dot: "inc" },
+    birthday: { name: "День рождения", icon: "🎂", type: "expense", dot: "bday" },
+    event:    { name: "Событие", icon: "✨", type: "expense", dot: "ev" },
+    goal:     { name: "Взнос в цель", icon: "🐷", type: "expense", dot: "goal" }
+  };
+  var EV_ICONS = ["✨", "✈️", "💍", "🎉", "🎓", "🏥"];
+  var GOAL_ICONS = ["✈️", "💻", "🏠", "🚗", "🛡", "🎁", "🎓", "💍"];
+  var REPEAT_TEXT = { "": "Нет", week: "Каждую неделю", month: "Каждый месяц", year: "Каждый год" };
+  var EV_DEFAULTS = { regular: { repeat: "month", remind: 1 }, salary: { repeat: "month", remind: 0 }, birthday: { repeat: "year", remind: 7 },
+                      event: { repeat: "", remind: 7 }, goal: { repeat: "month", remind: 0 } };
+  var OVERDUE_DAYS = 31, UPCOMING_DAYS = 60;
+  var PLAN_SUB_KEY = "finance-app-plan", SNOOZE_KEY = "finance-app-snooze";
+
+  function parseD(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function addDays(s, n) { var d = parseD(s); d.setDate(d.getDate() + n); return ymd(d); }
+  function daysBetween(a, b) { return Math.round((parseD(b) - parseD(a)) / DAY); } // b − a, в днях
+  function longDate(s, withYear) { var d = parseD(s); return d.getDate() + " " + MONTHS_GEN[d.getMonth()] + (withYear || d.getFullYear() !== new Date().getFullYear() ? " " + d.getFullYear() : ""); }
+  function dayWd(s) { var d = parseD(s); return d.getDate() + " " + MONTHS_GEN[d.getMonth()] + ", " + WD_SHORT[d.getDay()].toLowerCase(); }
+  function ceilRub(k) { return Math.ceil(k / 100) * 100; }
+
+  // ---------- Проверка записей плана и целей (normalize) ----------
+  function cleanPlan(p, accIds) {
+    // вызывается из load() до объявления EV_KIND — только свои константы
+    var KN = { regular: "Платёж", salary: "Доход", birthday: "День рождения", event: "Событие", goal: "Взнос в цель" };
+    if (!p || typeof p !== "object" || !KN.hasOwnProperty(p.kind) || !isValidDate(p.date)) return null;
+    var amount = p.amount === undefined || p.amount === null ? 0 : p.amount;
+    if (!(amount === 0 || isValidAmount(amount))) return null;
+    var every = p.repeat && typeof p.repeat === "object" && ["week", "month", "year"].indexOf(p.repeat.every) !== -1 ? p.repeat.every : "";
+    var n = { id: str(p.id) || makeId(), kind: p.kind, type: p.kind === "salary" ? "income" : p.type === "income" && p.kind !== "goal" ? "income" : "expense",
+              amount: Math.round(amount), category: str(p.category), accountId: accIds.indexOf(str(p.accountId)) !== -1 ? str(p.accountId) : "",
+              comment: str(p.comment), title: str(p.title).trim() || str(p.person).trim() || KN[p.kind], date: p.date,
+              repeat: every ? { every: every } : null, remindDays: isInt(p.remindDays, 0, 60) ? p.remindDays : 0, marks: {} };
+    if (p.repeat && p.repeat.day !== undefined) n.repeat && (n.repeat.day = p.repeat.day);
+    if (p.person !== undefined) n.person = str(p.person);
+    if (p.icon !== undefined) n.icon = str(p.icon).slice(0, 8);
+    if (p.kind === "goal") n.goalId = str(p.goalId);
+    if (p.marks && typeof p.marks === "object") Object.keys(p.marks).forEach(function (d) { if (isValidDate(d) && (p.marks[d] === "done" || p.marks[d] === "skipped")) n.marks[d] = p.marks[d]; });
+    Object.keys(p).forEach(function (k) { if (!(k in n) && k !== "repeat") n[k] = JSON.parse(JSON.stringify(p[k])); }); // поля будущих версий не теряем
+    return n;
+  }
+  function cleanGoal(g, accIds) {
+    if (!g || typeof g !== "object" || !str(g.title).trim() || !isValidAmount(g.target)) return null;
+    var n = { id: str(g.id) || makeId(), title: str(g.title).trim(), target: Math.round(g.target), deadline: isValidDate(g.deadline) ? g.deadline : null,
+              priority: [1, 2, 3].indexOf(g.priority) !== -1 ? g.priority : 2, paused: g.paused === true, contributions: [] };
+    if (str(g.icon)) n.icon = str(g.icon).slice(0, 8); // без значка — 🐷 при показе, данные не дополняем
+    if (g.deleted === true) n.deleted = true;
+    if (Array.isArray(g.contributions)) g.contributions.forEach(function (c) {
+      if (!c || typeof c !== "object" || !isValidDate(c.date) || typeof c.amount !== "number" || !isFinite(c.amount) || !c.amount || Math.abs(c.amount) > MAX_AMOUNT) return;
+      var nc = { id: str(c.id) || makeId(), date: c.date, amount: Math.round(c.amount), accountId: accIds.indexOf(str(c.accountId)) !== -1 ? str(c.accountId) : "" };
+      if (c.planId !== undefined) nc.planId = str(c.planId);
+      if (c.planDate !== undefined && isValidDate(c.planDate)) nc.planDate = c.planDate;
+      if (c.ret === true) nc.ret = true;
+      n.contributions.push(nc);
+    });
+    Object.keys(g).forEach(function (k) { if (!(k in n)) n[k] = JSON.parse(JSON.stringify(g[k])); });
+    return n;
+  }
+  function cleanList(list, fn, accIds, report) {
+    if (!Array.isArray(list)) return [];
+    var out = [];
+    list.forEach(function (it) { var n = fn(it, accIds); if (n) out.push(n); else report.bad++; });
+    return out;
+  }
+
+  // ---------- Подсчёты (architecture.md 4) ----------
+  function goalIco(g) { return g.icon || "🐷"; }
+  function goalById(id) { for (var i = 0; i < state.goals.length; i++) if (state.goals[i].id === id) return state.goals[i]; return null; }
+  function liveGoals() { return state.goals.filter(function (g) { return !g.deleted; }); }
+  function goalLive(id) { var g = goalById(id); return !!g && !g.deleted; }
+  // Все даты пункта плана в [from, to]
+  function planDates(p, from, to) {
+    var out = [], start = p.date, guard = 0;
+    if (!p.repeat) { if (start >= from && start <= to) out.push(start); return out; }
+    var every = p.repeat.every;
+    if (every === "week") {
+      var d = start;
+      if (d < from) { d = addDays(d, Math.floor(daysBetween(d, from) / 7) * 7); if (d < from) d = addDays(d, 7); }
+      for (; d <= to && guard++ < 600; d = addDays(d, 7)) out.push(d);
+      return out;
+    }
+    // каждый месяц / год: день из первой даты, в коротком месяце — последний день
+    var s = parseD(start), day = s.getDate(), y = s.getFullYear(), m = s.getMonth();
+    var fy = +from.slice(0, 4), fm = +from.slice(5, 7) - 1;
+    if (every === "month" && fy * 12 + fm > y * 12 + m) { y = fy; m = fm; }
+    if (every === "year" && fy > y) y = fy;
+    while (guard++ < 600) {
+      var ds = ymd(new Date(y, m, Math.min(day, new Date(y, m + 1, 0).getDate())));
+      if (ds > to) break;
+      if (ds >= from && ds >= start) out.push(ds);
+      if (every === "month") { m++; if (m > 11) { m = 0; y++; } } else y++;
+    }
+    return out;
+  }
+  function activePlans() { return state.plans.filter(function (p) { return p.kind !== "goal" || goalLive(p.goalId); }); }
+  // Пункты плана на даты: { plan, date, mark } по дате
+  function occurrences(from, to) {
+    var list = [];
+    activePlans().forEach(function (p) { planDates(p, from, to).forEach(function (d) { list.push({ plan: p, date: d, mark: (p.marks && p.marks[d]) || "" }); }); });
+    return list.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  }
+  function planned(from, to) { return occurrences(from, to).filter(function (o) { return !o.mark; }); }
+  function overdue(t) { return planned(addDays(t, -OVERDUE_DAYS), addDays(t, -1)).filter(function (o) { return o.plan.kind !== "birthday"; }); }
+  function planCur(p) { return p.kind === "regular" || p.kind === "salary" ? accCurrency(p.accountId || defaultAccountId()) : "RUB"; }
+  function planRub(p) { return toRub(p.amount, planCur(p)); }
+  // «Откладывать»: у событий и дней рождения с бюджетом, если до даты больше 3 дней (14.7)
+  function saveFor(o, t) {
+    var k = o.plan.kind, n = daysBetween(t, o.date);
+    if ((k !== "event" && k !== "birthday") || !o.plan.amount || n <= 3 || o.mark) return null;
+    return n <= 14 ? { amount: ceilRub(planRub(o.plan) / n), per: "в день" } : { amount: ceilRub(planRub(o.plan) * 7 / n), per: "в неделю" };
+  }
+  // Сводка месяца: обязательные траты, ожидаемый доход, «откладывать на события в день»
+  function calSummary(y, m) {
+    var t = todayStr(), from = monthKey(y, m) + "-01", to = ymd(new Date(y, m + 1, 0)), sum = { oblig: 0, income: 0, perDay: 0 };
+    planned(from, to).forEach(function (o) {
+      if (o.date < t && o.plan.kind === "birthday") return;
+      if (o.plan.type === "income") sum.income += planRub(o.plan); else sum.oblig += planRub(o.plan);
+    });
+    planned(addDays(t, 4), addDays(t, UPCOMING_DAYS)).forEach(function (o) {
+      if (o.plan.kind === "event" || o.plan.kind === "birthday") sum.perDay += planRub(o.plan) / daysBetween(t, o.date);
+    });
+    sum.perDay = sum.perDay ? ceilRub(sum.perDay) : 0;
+    return sum;
+  }
+  function goalSaved(g) { return g.contributions.reduce(function (s, c) { return s + c.amount; }, 0); }
+  function goalPlan(g) { return state.plans.filter(function (p) { return p.kind === "goal" && p.goalId === g.id; })[0] || null; }
+  function monthlyOf(p) { return !p || !p.repeat ? 0 : p.repeat.every === "week" ? Math.round(p.amount * 52 / 12) : p.repeat.every === "year" ? Math.round(p.amount / 12) : p.amount; }
+  function monthsTo(t, d) { var a = parseD(t), b = parseD(d); return (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth() - (b.getDate() < a.getDate() ? 1 : 0); }
+  function addMonths(s, n) { var d = parseD(s), day = d.getDate(), x = new Date(d.getFullYear(), d.getMonth() + n, 1); x.setDate(Math.min(day, new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); return ymd(x); }
+  // goalProgress (architecture 4): { saved, left, pct, need: {amount, per}, pace, eta, late }
+  function goalProgress(g, today) {
+    var t = today || todayStr(), saved = goalSaved(g), left = Math.max(0, g.target - saved), r = { saved: saved, left: left, pct: Math.min(100, Math.floor(saved * 100 / g.target)), done: saved >= g.target };
+    if (g.paused || r.done || !g.deadline) return r;
+    var days = daysBetween(t, g.deadline);
+    if (days <= 0) { r.need = { amount: ceilRub(left), per: "сейчас" }; }
+    else if (days < 61) r.need = { amount: ceilRub(left / Math.max(1, Math.ceil(days / 7))), per: "в неделю" };
+    else r.need = { amount: ceilRub(left / Math.max(1, monthsTo(t, g.deadline))), per: "в месяц" };
+    // Темп: средний взнос за 3 месяца, если копим дольше; иначе — регулярный взнос из плана (15.6)
+    var from3 = addMonths(t, -3), first = g.contributions.filter(function (c) { return c.amount > 0 && !c.ret && c.accountId; }).map(function (c) { return c.date; }).sort()[0];
+    var pace = 0;
+    if (first && first <= from3) pace = Math.round(g.contributions.filter(function (c) { return c.date > from3 && c.date <= t && !c.ret; }).reduce(function (s, c) { return s + c.amount; }, 0) / 3);
+    else pace = monthlyOf(goalPlan(g));
+    r.pace = pace;
+    if (pace > 0) {
+      r.eta = addMonths(t, Math.ceil(left / pace));
+      if (r.eta > g.deadline) { r.late = monthsTo(g.deadline, r.eta) || 1; r.fixPay = ceilRub(left / Math.max(1, monthsTo(t, g.deadline))); }
+    }
+    return r;
+  }
+
+  // ---------- «План»: разделы Календарь · Бюджеты · Цели ----------
+  var planSub = "calendar";
+  try { var ps0 = localStorage.getItem(PLAN_SUB_KEY); if (ps0 === "budgets" || ps0 === "goals" || ps0 === "calendar") planSub = ps0; } catch (e) {}
+  function setPlanSub(sub, fromHash) {
+    if (["calendar", "budgets", "goals"].indexOf(sub) === -1) sub = "calendar";
+    var paneId = sub === "budgets" ? "pair" : sub === "calendar" ? "paneCalendar" : "paneGoals", shown = !$(paneId).hidden && planSub === sub;
+    planSub = sub;
+    try { localStorage.setItem(PLAN_SUB_KEY, sub); } catch (e) {}
+    document.querySelectorAll('#planTabs input').forEach(function (r) { r.checked = r.value === sub; });
+    $("pair").hidden = sub !== "budgets";
+    $("paneCalendar").hidden = sub !== "calendar";
+    $("paneGoals").hidden = sub !== "goals";
+    if (!fromHash && currentScreen === "budget" && location.hash !== "#plan/" + sub) { try { history.replaceState(history.state, "", "#plan/" + sub); } catch (e) {} }
+    if (shown) return; // раздел уже открыт: не перерисовываем (поле лимита с курсором не пропадает)
+    if (sub === "budgets") { renderChart(); renderFlow(); if (!$("limitsCard").hidden) renderLimitInputs(); }
+    if (sub === "calendar") renderPlanCal();
+    if (sub === "goals") renderGoals();
+  }
+  document.querySelectorAll('#planTabs input').forEach(function (r) { r.addEventListener("change", function () { if (r.checked) setPlanSub(r.value); }); });
+
+  // ---------- Календарь ----------
+  var calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = null, calFocusDate = null;
+  function planIcon(p) { return p.kind === "event" && p.icon ? p.icon : p.kind === "goal" && goalById(p.goalId) ? "🐷" : EV_KIND[p.kind].icon; }
+  function planTitle(p) { if (p.kind === "goal") { var g = goalById(p.goalId); return "Взнос: " + (g ? g.title : "цель"); } return p.title; }
+  function planSumText(p) {
+    if (!p.amount) return "";
+    var m = curMoney(p.amount, planCur(p));
+    return p.kind === "goal" ? m : p.type === "income" ? signedMoney(p.amount, "income", planCur(p)) : signedMoney(p.amount, "expense", planCur(p));
+  }
+  function relText(d, t) {
+    var n = daysBetween(t, d), txt = longDate(d);
+    if (n === 0) return txt + " · сегодня";
+    if (n === 1) return txt + " · завтра";
+    if (n > 1 && n <= 14) return txt + " · через " + n + " " + plural(n, "день", "дня", "дней");
+    return txt;
+  }
+  function evRow(o, t) {
+    var p = o.plan, li = document.createElement("li");
+    li.className = "ev-row" + (o.mark ? " ev-marked" : "");
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "ev-open";
+    b.innerHTML = '<span class="ev-ico" aria-hidden="true"></span><span class="ev-text"><span class="ev-title"></span><span class="ev-meta"></span></span><span class="ev-sum num"></span>';
+    b.querySelector(".ev-ico").textContent = planIcon(p);
+    b.querySelector(".ev-title").textContent = planTitle(p);
+    var meta = b.querySelector(".ev-meta"), n = daysBetween(t, o.date), late = n < 0 && !o.mark;
+    meta.textContent = relText(o.date, t) + (o.mark === "done" ? " · записано" : o.mark === "skipped" ? " · пропущено" : "");
+    var extra = [];
+    if (late) extra.push(["ev-late", "Просрочено " + (-n) + " " + plural(-n, "день", "дня", "дней")]);
+    var sf = saveFor(o, t);
+    if (sf) extra.push(["ev-save", "Откладывать: " + money(sf.amount) + " " + sf.per]);
+    extra.forEach(function (x) { var s = document.createElement("span"); s.className = x[0]; s.textContent = x[1]; b.querySelector(".ev-text").appendChild(s); });
+    var sum = b.querySelector(".ev-sum");
+    sum.textContent = planSumText(p);
+    sum.classList.add(p.kind === "goal" ? "plain" : p.type);
+    b.setAttribute("aria-label", EV_KIND[p.kind].name + ": " + planTitle(p) + ", " + meta.textContent + (late ? ", просрочено" : "") + (p.amount ? ", " + sum.textContent : ""));
+    b.addEventListener("click", function () { openEvent(p.id, o.date, b); });
+    li.appendChild(b);
+    return li;
+  }
+  function renderPlanCal() {
+    var t = todayStr(), y = calY, m = calM, desk = !isNarrow();
+    // Сводка
+    var s = calSummary(y, m);
+    $("csLabel").textContent = MONTHS[m] + " · обязательно";
+    $("csOblig").textContent = money(s.oblig);
+    $("csIncome").textContent = s.income ? signedMoney(s.income, "income") : money(0);
+    $("csNote").textContent = s.perDay ? "Откладывать на события: " + money(s.perDay) + " в день" : "";
+    $("csNote").hidden = !s.perDay;
+    // Месяц
+    $("cmTitle").textContent = MONTHS[m] + " " + y;
+    $("cmTitle").setAttribute("aria-label", "Выбрать месяц, сейчас " + (MONTHS[m] + " " + y).toLowerCase());
+    $("cmToday").hidden = isNowMonth(y, m);
+    var first = new Date(y, m, 1), off = (first.getDay() + 6) % 7, dim = new Date(y, m + 1, 0).getDate();
+    var rows = desk ? 6 : Math.ceil((off + dim) / 7), start = ymd(new Date(y, m, 1 - off)), end = addDays(start, rows * 7 - 1);
+    var byDay = dict();
+    occurrences(start, end).forEach(function (o) { (byDay[o.date] = byDay[o.date] || []).push(o); });
+    if (!calFocusDate || calFocusDate.slice(0, 7) !== monthKey(y, m)) calFocusDate = calSel && calSel.slice(0, 7) === monthKey(y, m) ? calSel : isNowMonth(y, m) ? t : monthKey(y, m) + "-01";
+    var grid = $("cmGrid");
+    grid.innerHTML = "";
+    grid.style.gridTemplateRows = "repeat(" + rows + ", auto)";
+    for (var i = 0; i < rows * 7; i++) {
+      var d = addDays(start, i), own = d.slice(0, 7) === monthKey(y, m), list = own ? byDay[d] || [] : [], dn = +d.slice(8);
+      var c = document.createElement(own ? "button" : "span");
+      c.className = "cm-day" + (own ? "" : " out") + (d === t ? " today" : "") + (d === calSel ? " sel" : "");
+      if (own) {
+        c.type = "button";
+        c.setAttribute("data-date", d);
+        c.setAttribute("aria-pressed", String(d === calSel));
+        if (d === t) c.setAttribute("aria-current", "date");
+        c.setAttribute("aria-label", dn + " " + MONTHS_GEN[m] + (list.length ? ", " + list.length + " " + plural(list.length, "событие", "события", "событий") : ""));
+        c.tabIndex = d === calFocusDate ? 0 : -1;
+      } else c.setAttribute("aria-hidden", "true");
+      var num = document.createElement("span");
+      num.className = "cd-num num";
+      num.textContent = dn;
+      c.appendChild(num);
+      if (list.length) {
+        var dots = document.createElement("span"), evs = document.createElement("span");
+        dots.className = "cd-dots"; evs.className = "cd-evs";
+        list.slice(0, 3).forEach(function (o) { var k = document.createElement("i"); k.className = "dot dot-" + EV_KIND[o.plan.kind].dot; dots.appendChild(k); });
+        if (list.length > 3) { var mo = document.createElement("span"); mo.className = "cd-more"; mo.textContent = "+" + (list.length - 3); dots.appendChild(mo); }
+        list.slice(0, 2).forEach(function (o) {
+          var e = document.createElement("span"); e.className = "cd-ev";
+          e.innerHTML = '<i class="dot dot-' + EV_KIND[o.plan.kind].dot + '"></i><span class="cd-evt"></span>';
+          e.lastChild.textContent = planTitle(o.plan);
+          evs.appendChild(e);
+        });
+        if (list.length > 2) { var mo2 = document.createElement("span"); mo2.className = "cd-more"; mo2.textContent = "+" + (list.length - 2); evs.appendChild(mo2); }
+        dots.setAttribute("aria-hidden", "true"); evs.setAttribute("aria-hidden", "true");
+        c.appendChild(dots); c.appendChild(evs);
+      }
+      grid.appendChild(c);
+    }
+    renderCalList();
+  }
+  function renderCalList() {
+    var t = todayStr(), ul = $("cuList");
+    ul.innerHTML = "";
+    $("cuAll").hidden = !calSel;
+    $("cuTitle").textContent = calSel ? dayWd(calSel) : "Ближайшие";
+    var noPlans = !activePlans().length;
+    $("cuEmpty").hidden = !noPlans;
+    $("cuNone").hidden = true;
+    if (noPlans) return;
+    var groups;
+    if (calSel) groups = [["", occurrences(calSel, calSel)]];
+    else {
+      var sun = addDays(t, (7 - parseD(t).getDay()) % 7), g = [[], [], []];
+      overdue(t).concat(planned(t, addDays(t, UPCOMING_DAYS))).forEach(function (o) { g[o.date <= t ? 0 : o.date <= sun ? 1 : 2].push(o); });
+      groups = [["Сегодня", g[0]], ["Эта неделя", g[1]], ["Позже", g[2]]];
+    }
+    var any = false;
+    groups.forEach(function (gr) {
+      if (!gr[1].length) return;
+      any = true;
+      if (gr[0]) { var h = document.createElement("li"); h.className = "ev-group"; h.textContent = gr[0]; ul.appendChild(h); }
+      gr[1].forEach(function (o) { ul.appendChild(evRow(o, t)); });
+    });
+    if (!any) { $("cuNone").textContent = calSel ? "В этот день событий нет" : "В ближайшие 60 дней событий нет"; $("cuNone").hidden = false; }
+  }
+  function shiftCal(d) { calM += d; if (calM < 0) { calM = 11; calY--; } if (calM > 11) { calM = 0; calY++; } calSel = null; renderPlanCal(); }
+  function pickDay(d, focus) {
+    calSel = calSel === d ? null : d;
+    calFocusDate = d;
+    renderPlanCal();
+    if (focus) { var b = document.querySelector('#cmGrid [data-date="' + d + '"]'); if (b) b.focus(); }
+  }
+  $("cmPrev").addEventListener("click", function () { shiftCal(-1); });
+  $("cmNext").addEventListener("click", function () { shiftCal(1); });
+  $("cmToday").addEventListener("click", function () { var n = new Date(); calY = n.getFullYear(); calM = n.getMonth(); calSel = null; renderPlanCal(); });
+  $("cuAll").addEventListener("click", function () { calSel = null; renderPlanCal(); $("cuAdd").focus(); });
+  $("cuAdd").addEventListener("click", function () { openEventNew({ kind: "regular", date: calSel && calSel >= todayStr() ? calSel : null }, $("cuAdd")); });
+  $("cmGrid").addEventListener("click", function (e) { var b = e.target.closest("button.cm-day"); if (b) pickDay(b.getAttribute("data-date"), true); });
+  $("cmGrid").addEventListener("dblclick", function (e) {
+    var b = e.target.closest("button.cm-day");
+    if (!b || isNarrow() || e.target.closest(".cd-ev")) return;
+    calSel = b.getAttribute("data-date"); renderPlanCal();
+    openEventNew({ kind: "event", date: calSel }, b);
+  });
+  $("cmGrid").addEventListener("keydown", function (e) {
+    var b = e.target.closest("button.cm-day");
+    if (!b) return;
+    var step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    var d = addDays(b.getAttribute("data-date"), step);
+    calFocusDate = d;
+    if (d.slice(0, 7) !== monthKey(calY, calM)) { var p = parseD(d); calY = p.getFullYear(); calM = p.getMonth(); }
+    renderPlanCal();
+    var nb = document.querySelector('#cmGrid [data-date="' + d + '"]'); if (nb) nb.focus();
+  });
+  document.querySelectorAll("#cuEmpty [data-tpl]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var k = b.getAttribute("data-tpl");
+      openEventNew({ kind: k, title: k === "regular" ? "Аренда" : k === "salary" ? "Зарплата" : "" }, b);
+    });
+  });
+  // «‹ Ноябрь 2026 ›»: название открывает ту же панель месяцев, что и 📅 на Главной (17.23.2)
+  $("cmTitle").addEventListener("click", function () {
+    openMonthPicker({ btn: $("cmTitle"), box: $("cmHead"), get: function () { return [calY, calM]; },
+                      set: function (y, m) { calY = y; calM = m; calSel = null; renderPlanCal(); } });
+  });
+
+  // ---------- Лист «Событие» (просмотр) и «Новое событие» (изменение) ----------
+  var evId = null, evDate = null, evKind = "regular", evRemind = 1, evIcon = "✨", evGoalId = null;
+  function giftCat() { var c = categoriesOf("expense"); return c.indexOf("Подарки") !== -1 ? "Подарки" : c.indexOf("Другое") !== -1 ? "Другое" : c[0]; }
+  function planById(id) { for (var i = 0; i < state.plans.length; i++) if (state.plans[i].id === id) return state.plans[i]; return null; }
+  function nextDate(p, from) { var l = planDates(p, from, addDays(from, 800)); return l[0] || null; }
+  function openEvent(id, date, opener) {
+    var p = planById(id);
+    if (!p) return;
+    evId = id;
+    evDate = date || nextDate(p, todayStr()) || p.date;
+    var mark = (p.marks && p.marks[evDate]) || "";
+    $("evView").hidden = false; $("evForm").hidden = true;
+    $("evH").textContent = EV_KIND[p.kind].name;
+    $("evHico").textContent = planIcon(p);
+    $("evHtitle").textContent = planTitle(p);
+    $("evHsum").textContent = planSumText(p) || "Без суммы";
+    var rows = [["Следующий раз", relText(evDate, todayStr()) + (mark === "done" ? " · записано" : mark === "skipped" ? " · пропущено" : "")],
+                ["Повтор", REPEAT_TEXT[p.repeat ? p.repeat.every : ""]]];
+    if (p.accountId && state.accounts.length > 1) rows.push(["Счёт", accountName(p.accountId)]);
+    if (p.kind !== "goal" && p.category) rows.push(["Категория", p.category]);
+    if (p.remindDays) rows.push(["Напомнить", "за " + p.remindDays + " " + plural(p.remindDays, "день", "дня", "дней")]);
+    var dl = $("evRows");
+    dl.innerHTML = "";
+    rows.forEach(function (r) { var dt = document.createElement("dt"), dd = document.createElement("dd"); dt.textContent = r[0]; dd.textContent = r[1]; dl.appendChild(dt); dl.appendChild(dd); });
+    $("evMain").textContent = mark ? "Вернуть в план" : p.kind === "birthday" ? "Купил подарок" : p.kind === "goal" ? "Отложить" : "Записать";
+    $("evSkip").hidden = !!mark;
+    openModal("evModal", opener);
+    $("evMain").focus({ preventScroll: true });
+  }
+  function fillEvCats(type, value) {
+    var sel = $("evCat"), list = categoriesOf(type);
+    sel.innerHTML = "";
+    list.forEach(function (c) { var o = document.createElement("option"); o.value = c; o.textContent = catInfo(type, c).icon + " " + c; sel.appendChild(o); });
+    sel.value = list.indexOf(value) !== -1 ? value : list[0];
+  }
+  function fillEvAccs(value) {
+    var sel = $("evAcc"), list = activeAccounts().filter(function (a) { return evKind !== "goal" || a.currency === "RUB"; });
+    sel.innerHTML = "";
+    list.forEach(function (a) { var o = document.createElement("option"); o.value = a.id; o.textContent = (ACC_KINDS[a.kind] || ACC_KINDS.card).icon + " " + a.name; sel.appendChild(o); });
+    sel.value = list.some(function (a) { return a.id === value; }) ? value : list[0] ? list[0].id : "";
+  }
+  function renderEvKind() {
+    var k = evKind, goal = k === "goal";
+    document.querySelectorAll("#evKinds button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-kind") === k)); });
+    $("evKinds").hidden = goal;
+    $("evTitleBox").hidden = goal;
+    $("evGoalLine").hidden = !goal;
+    if (goal) { var g = goalById(evGoalId); $("evGoalLine").textContent = "В цель: " + (g ? goalIco(g) + " " + g.title : ""); }
+    $("evTitleLabel").textContent = k === "birthday" ? "Имя" : "Название";
+    $("evTitle").placeholder = k === "birthday" ? "Например, Анна" : k === "salary" ? "Например, Зарплата" : k === "event" ? "Например, Поездка" : "Например, Аренда";
+    $("evIcons").hidden = k !== "event";
+    document.querySelectorAll("#evIcons button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === evIcon)); });
+    $("evAmountLabel").textContent = k === "birthday" ? "Бюджет подарка" : k === "event" ? "Бюджет" : "Сумма";
+    var type = k === "salary" ? "income" : "expense";
+    $("evCatBox").hidden = goal;
+    if (!goal && (!$("evCat").options.length || $("evCat").getAttribute("data-type") !== type)) { fillEvCats(type, k === "birthday" ? giftCat() : ""); $("evCat").setAttribute("data-type", type); }
+    $("evAccBox").hidden = !(k === "regular" || k === "salary" || goal) || activeAccounts().length < 2;
+    $("evRepeatBox").hidden = k === "birthday";
+    [].forEach.call($("evRepeat").options, function (o) { o.hidden = goal && (o.value === "" || o.value === "year"); });
+    $("evDateLabel").textContent = k === "birthday" ? "День рождения" : k === "event" ? "Дата" : "Первая дата";
+    document.querySelectorAll("#evRemind button").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-d") === evRemind)); });
+    $("evSave").textContent = goal ? "Сохранить взнос" : "Сохранить событие";
+  }
+  function setEvKind(k, keepFields) {
+    var was = evKind;
+    evKind = k;
+    if (!keepFields) {
+      var d = EV_DEFAULTS[k];
+      $("evRepeat").value = d.repeat;
+      evRemind = d.remind;
+      if (k === "birthday" || (was === "birthday" && k !== "birthday")) $("evCat").setAttribute("data-type", "");
+    }
+    renderEvKind();
+  }
+  // init = { kind, title, date, goalId, amount, accountId }
+  function openEventNew(init, opener) {
+    init = init || {};
+    evId = null; evDate = null; evGoalId = init.goalId || null; evIcon = "✨";
+    $("evH").textContent = init.kind === "goal" ? "Регулярный взнос" : "Новое событие";
+    $("evTitle").value = init.title || "";
+    $("evAmount").value = isValidAmount(init.amount) ? amountInputText(init.amount) : "";
+    $("evDate").value = init.date && isValidDate(init.date) ? init.date : todayStr();
+    $("evCat").setAttribute("data-type", "");
+    fillEvAccs(init.accountId || rememberedAcc(init.kind === "salary" ? "income" : "expense"));
+    $("evError").hidden = true;
+    $("evView").hidden = true; $("evForm").hidden = false;
+    setEvKind(init.kind || "regular");
+    openModal("evModal", opener);
+    (init.kind === "goal" ? $("evAmount") : $("evTitle")).focus({ preventScroll: true });
+  }
+  function editEvent() {
+    var p = planById(evId);
+    if (!p) return;
+    $("evH").textContent = p.kind === "goal" ? "Регулярный взнос" : "Изменить событие";
+    evGoalId = p.goalId || null; evIcon = p.icon || "✨";
+    $("evTitle").value = p.kind === "birthday" ? p.person || p.title : p.title;
+    $("evAmount").value = p.amount ? amountInputText(p.amount) : "";
+    $("evDate").value = p.date;
+    evKind = p.kind;
+    $("evCat").setAttribute("data-type", "");
+    renderEvKind();
+    if (p.kind !== "goal") fillEvCats(p.type, p.category), $("evCat").setAttribute("data-type", p.type);
+    fillEvAccs(p.accountId);
+    $("evRepeat").value = p.repeat ? p.repeat.every : "";
+    evRemind = p.remindDays;
+    renderEvKind();
+    $("evError").hidden = true;
+    $("evView").hidden = true; $("evForm").hidden = false;
+    $("evTitle").focus({ preventScroll: true });
+  }
+  function evFail(text, el) { $("evError").textContent = text; $("evError").hidden = false; if (el) el.focus(); }
+  function saveEvent() {
+    var k = evKind, title = $("evTitle").value.trim(), am = $("evAmount").value.trim() ? parseAmount($("evAmount").value) : 0, date = $("evDate").value;
+    if (k !== "goal" && !title) { evFail(k === "birthday" ? "Введите имя" : "Введите название", $("evTitle")); return; }
+    if ($("evAmount").value.trim() && (!am || am > MAX_AMOUNT)) { evFail(am ? TOO_BIG_TEXT : "Введите сумму числом, например 5000", $("evAmount")); return; }
+    if (!am && k !== "birthday" && k !== "event") { evFail("Введите сумму больше нуля", $("evAmount")); return; }
+    if (!isValidDate(date)) { evFail("Выберите дату", $("evDate")); return; }
+    var old = evId && planById(evId), every = k === "birthday" ? "year" : $("evRepeat").value;
+    if (k === "goal" && every !== "week" && every !== "month") every = "month";
+    var p = old || { id: makeId(), marks: {} };
+    p.kind = k;
+    p.type = k === "salary" ? "income" : "expense";
+    p.amount = am;
+    p.title = k === "goal" ? "Взнос в цель" : k === "birthday" ? "День рождения: " + title : title;
+    if (k === "birthday") p.person = title; else delete p.person;
+    if (k === "event") p.icon = evIcon; else delete p.icon;
+    if (k === "goal") p.goalId = evGoalId; else delete p.goalId;
+    p.category = k === "goal" ? "" : $("evCat").value;
+    p.accountId = k === "regular" || k === "salary" || k === "goal" ? ($("evAcc").value || defaultAccountId()) : "";
+    p.comment = p.comment || "";
+    p.date = date;
+    p.repeat = every ? { every: every } : null;
+    p.remindDays = evRemind;
+    if (!old) state.plans.push(p);
+    save();
+    render();
+    closeModal();
+    if (k === "goal") toast("Регулярный взнос сохранён"); else toast(old ? "Событие сохранено" : "Событие добавлено: " + p.title);
+  }
+  function deleteEvent() {
+    var p = planById(evId);
+    if (!p) return;
+    if (!confirm("Удалить «" + planTitle(p) + "»? Прошлые операции останутся.")) return;
+    var i = state.plans.indexOf(p);
+    state.plans.splice(i, 1);
+    save(); render(); closeModal();
+    toast("Событие удалено", "Отменить", function () { state.plans.splice(Math.min(i, state.plans.length), 0, p); save(); render(); toast("Событие восстановлено"); }, 6000);
+  }
+  function setMark(p, d, v) { if (!p.marks) p.marks = {}; if (v) p.marks[d] = v; else delete p.marks[d]; }
+  function skipEvent(p, d) {
+    setMark(p, d, "skipped");
+    save(); render();
+    toast("Пропущено: " + planTitle(p) + ", " + longDate(d), "Отменить", function () { setMark(p, d, ""); save(); render(); }, 6000);
+  }
+  // «Записать» / «Купил подарок» / «Отложить» — та же форма операции (architecture 5), пункт отмечается при «Добавить»
+  function recordPlan(p, d) {
+    var t = todayStr();
+    if (p.kind === "goal") { openGoalForm(p.goalId, "in", { amount: p.amount, accountId: p.accountId, planId: p.id, planDate: d }); return; }
+    if (p.kind === "birthday") { openSheet({ type: "expense", category: giftCat(), amount: p.amount || undefined, comment: "Подарок: " + (p.person || p.title), date: t, planId: p.id, planDate: d, source: "plan" }); return; }
+    openSheet({ type: p.type, category: p.category, amount: p.amount, comment: p.title, date: d < t ? d : t, accountId: p.accountId, planId: p.id, planDate: d, source: "plan" });
+  }
+  $("evMain").addEventListener("click", function () {
+    var p = planById(evId), d = evDate;
+    if (!p) return;
+    if (p.marks && p.marks[d]) { setMark(p, d, ""); save(); render(); closeModal(); toast("Вернули в план: " + planTitle(p)); return; }
+    closeModal(true);
+    recordPlan(p, d);
+  });
+  $("evSkip").addEventListener("click", function () { var p = planById(evId); if (p) { closeModal(); skipEvent(p, evDate); } });
+  $("evEdit").addEventListener("click", editEvent);
+  $("evDelete").addEventListener("click", deleteEvent);
+  $("evSave").addEventListener("click", saveEvent);
+  $("evForm").addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "date") { e.preventDefault(); saveEvent(); } });
+  document.querySelectorAll("#evKinds button").forEach(function (b) { b.addEventListener("click", function () { setEvKind(b.getAttribute("data-kind")); }); });
+  document.querySelectorAll("#evIcons button").forEach(function (b) { b.addEventListener("click", function () { evIcon = b.textContent; renderEvKind(); }); });
+  document.querySelectorAll("#evRemind button").forEach(function (b) { b.addEventListener("click", function () { evRemind = +b.getAttribute("data-d"); renderEvKind(); }); });
+  ["evTitle", "evAmount", "evDate"].forEach(function (id) { $(id).addEventListener("input", function () { $("evError").hidden = true; }); });
+
+  // ---------- Плашки на Главной (17.25.5): «Пора записать», день рождения, взнос в цель ----------
+  function loadSnooze() { try { var v = JSON.parse(localStorage.getItem(SNOOZE_KEY) || "{}"); return v && typeof v === "object" ? v : {}; } catch (e) { return {}; } }
+  function planBanners(t) {
+    var sn = loadSnooze();
+    return planned(addDays(t, -OVERDUE_DAYS), addDays(t, 14)).filter(function (o) {
+      var n = daysBetween(t, o.date);
+      if (o.plan.kind === "birthday" && n < 0) return false;
+      if (n > o.plan.remindDays) return false;
+      var s = sn[o.plan.id + "|" + o.date];
+      return !(s && s > t);
+    }).sort(function (a, b) { var ka = a.plan.kind === "birthday" ? 1 : 0, kb = b.plan.kind === "birthday" ? 1 : 0; return ka - kb || (a.date < b.date ? -1 : 1); })
+      .map(function (o) { return { kind: o.plan.kind === "birthday" ? "birthday" : o.plan.kind === "goal" ? "goal" : "due", level: "plan", occ: o }; });
+  }
+  function renderPlanBanners() {
+    var box = $("planBanners"), t = todayStr(), list = collectBanners().filter(function (b) { return b.level === "plan"; });
+    box.innerHTML = "";
+    box.hidden = !list.length;
+    list.slice(0, 2).forEach(function (b) {
+      var o = b.occ, p = o.plan, n = daysBetween(t, o.date), el = document.createElement("section");
+      el.className = "plan-banner pb-" + b.kind;
+      el.setAttribute("role", "status");
+      var title = b.kind === "birthday" ? (p.person || p.title) + (n === 0 ? " — день рождения сегодня" : " — день рождения " + (n === 1 ? "завтра" : "через " + n + " " + plural(n, "день", "дня", "дней")))
+                : planTitle(p) + (n < 0 ? " — просрочено " + (-n) + " " + plural(-n, "день", "дня", "дней") : n === 0 ? " — сегодня" : n === 1 ? " — завтра" : " — через " + n + " " + plural(n, "день", "дня", "дней"));
+      var sub = b.kind === "birthday" ? (p.amount ? "Бюджет " + money(p.amount) : "Бюджет не задан") : planSumText(p).replace(/^[+−]/, "") || EV_KIND[p.kind].name;
+      el.innerHTML = '<span class="pb-ico" aria-hidden="true"></span><div class="pb-text"><div class="pb-title"></div><div class="pb-sub num"></div></div>' +
+                     '<button type="button" class="pb-go"></button><button type="button" class="icon pb-later" title="Позже">✕</button>';
+      el.querySelector(".pb-ico").textContent = planIcon(p);
+      el.querySelector(".pb-title").textContent = title;
+      el.querySelector(".pb-sub").textContent = sub;
+      var go = el.querySelector(".pb-go");
+      go.textContent = b.kind === "birthday" ? "Купил подарок" : b.kind === "goal" ? "Отложить" : "Записать";
+      go.setAttribute("aria-label", go.textContent + ": " + planTitle(p));
+      go.addEventListener("click", function () { recordPlan(p, o.date); });
+      var later = el.querySelector(".pb-later");
+      later.setAttribute("aria-label", "Позже: " + planTitle(p));
+      later.addEventListener("click", function () {
+        var sn = loadSnooze(), tm = addDays(t, 1);
+        Object.keys(sn).forEach(function (k) { if (sn[k] <= t) delete sn[k]; });
+        sn[p.id + "|" + o.date] = tm;
+        try { localStorage.setItem(SNOOZE_KEY, JSON.stringify(sn)); } catch (e) {}
+        renderPlanBanners();
+        toast("Напомним завтра");
+      });
+      box.appendChild(el);
+    });
+    if (list.length > 2) {
+      var more = document.createElement("button");
+      more.type = "button";
+      more.className = "link pb-more";
+      var n2 = list.length - 2;
+      more.textContent = "Ещё " + n2 + " " + plural(n2, "напоминание", "напоминания", "напоминаний") + " ›";
+      more.addEventListener("click", function () { calSel = null; var n = new Date(); calY = n.getFullYear(); calM = n.getMonth(); goTo("budget"); setPlanSub("calendar"); });
+      box.appendChild(more);
+    }
+  }
+
+  // ---------- Цели ----------
+  var goalEditId = null, goalIcon = "✈️";
+  function goalOrder(a, b) { return a.priority - b.priority || (a.deadline || "9999") .localeCompare(b.deadline || "9999") || 0; }
+  function renderGoals() {
+    var t = todayStr(), live = liveGoals(), act = live.filter(function (g) { return !g.paused; }).sort(goalOrder), pz = live.filter(function (g) { return g.paused; }).sort(goalOrder);
+    var total = live.reduce(function (s, g) { return s + goalSaved(g); }, 0);
+    $("gsTotal").textContent = money(total);
+    $("gsNote").textContent = live.length ? "отложено в " + live.length + " " + plural(live.length, "цели", "целях", "целях") : "";
+    $("goalsSum").hidden = !live.length;
+    $("goalsEmpty").hidden = !!live.length;
+    $("goalsGrid").innerHTML = ""; $("goalsPaused").innerHTML = "";
+    act.forEach(function (g) { $("goalsGrid").appendChild(goalCard(g, t)); });
+    pz.forEach(function (g) { $("goalsPaused").appendChild(goalCard(g, t)); });
+    $("goalsPausedLabel").hidden = !pz.length;
+  }
+  function goalCard(g, t) {
+    var r = goalProgress(g, t), c = document.createElement("section");
+    c.className = "card goal-card" + (g.paused ? " paused" : "") + (r.done ? " reached" : "");
+    c.setAttribute("data-goal", g.id);
+    var chip = g.paused ? "На паузе" : g.priority === 1 ? "Важная" : "";
+    c.innerHTML = '<div class="gc-head"><span class="gc-ico" aria-hidden="true"></span><div class="gc-name"><h3 class="gc-title"></h3><div class="gc-term"></div></div>' +
+                  (chip ? '<span class="gc-chip"></span>' : "") + '<span class="gc-pct num"></span></div>' +
+                  '<div class="gc-sum num"></div><div class="gc-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="gc-fill"></div></div><div class="gc-lines"></div>' +
+                  '<div class="gc-actions"></div>';
+    c.querySelector(".gc-ico").textContent = goalIco(g);
+    c.querySelector(".gc-title").textContent = g.title;
+    c.querySelector(".gc-term").textContent = g.deadline ? "до " + longDate(g.deadline, true) : "без срока";
+    if (chip) c.querySelector(".gc-chip").textContent = chip;
+    c.querySelector(".gc-pct").textContent = r.pct + " %";
+    c.querySelector(".gc-sum").textContent = number(r.saved) + " из " + money(g.target);
+    var bar = c.querySelector(".gc-bar");
+    bar.setAttribute("aria-valuenow", String(r.pct));
+    bar.setAttribute("aria-label", "Накоплено " + r.pct + " %");
+    c.querySelector(".gc-fill").style.width = r.pct + "%";
+    var lines = c.querySelector(".gc-lines");
+    function line(cls, text) { var d = document.createElement("div"); d.className = cls; d.textContent = text; lines.appendChild(d); return d; }
+    if (r.done) line("gc-done", "Цель достигнута");
+    else if (!g.paused && r.need) line("gc-need", r.need.per === "сейчас" ? "Срок прошёл, осталось " + money(r.left) : "Нужно " + money(r.need.amount) + " " + r.need.per);
+    if (!g.paused && !r.done && r.late) {
+      line("gc-late", "⚠ При текущем темпе — к " + longDate(r.eta, true) + ", на " + r.late + " " + plural(r.late, "месяц", "месяца", "месяцев") + " позже");
+      var fix = document.createElement("button");
+      fix.type = "button"; fix.className = "link gc-fix"; fix.textContent = "Что можно сделать ›";
+      fix.addEventListener("click", function () { openGoalFix(g.id, fix); });
+      lines.appendChild(fix);
+    }
+    var acts = c.querySelector(".gc-actions");
+    if (!g.paused) {
+      var add = document.createElement("button");
+      add.type = "button"; add.className = "gc-add";
+      add.textContent = r.done ? "Забрать деньги" : "＋ Взнос";
+      add.setAttribute("aria-label", (r.done ? "Забрать деньги из цели «" : "Взнос в цель «") + g.title + "»");
+      add.addEventListener("click", function () { openGoalForm(g.id, r.done ? "out" : "in"); });
+      acts.appendChild(add);
+    }
+    var dots = document.createElement("button");
+    dots.type = "button"; dots.className = "icon gc-more";
+    dots.innerHTML = lineIcon('<circle cx="5.5" cy="12" r="1.25"/><circle cx="12" cy="12" r="1.25"/><circle cx="18.5" cy="12" r="1.25"/>', 22);
+    dots.setAttribute("aria-label", "Действия с целью «" + g.title + "»");
+    dots.setAttribute("aria-haspopup", "menu");
+    dots.addEventListener("click", function () {
+      var gp = goalPlan(g), items = [];
+      if (!g.paused) items.push({ label: gp ? "Регулярный взнос: " + money(gp.amount) : "Регулярный взнос", fn: function () { if (gp) { evId = gp.id; openModal("evModal", dots); editEvent(); } else openEventNew({ kind: "goal", goalId: g.id }, dots); } });
+      if (r.saved > 0) items.push({ label: "Забрать из копилки", fn: function () { openGoalForm(g.id, "out"); } });
+      items.push({ label: "Изменить", fn: function () { openGoalEditor(g.id, dots); } });
+      items.push({ label: g.paused ? "Снять с паузы" : "На паузу", fn: function () { setGoalPaused(g, !g.paused); } });
+      openMiniMenu(dots, items);
+    });
+    acts.appendChild(dots);
+    return c;
+  }
+  function setGoalPaused(g, v) {
+    g.paused = v; save(); render();
+    toast(v ? "Цель на паузе: " + g.title : "Цель снова активна: " + g.title, "Отменить", function () { g.paused = !v; save(); render(); }, 6000);
+  }
+  // Лист «Цель» (15.7)
+  function openGoalEditor(id, opener, preset) {
+    var g = id && goalById(id);
+    goalEditId = g ? g.id : null;
+    goalIcon = g ? goalIco(g) : (preset && preset.icon) || "✈️";
+    $("goalH").textContent = g ? "Изменить цель" : "Новая цель";
+    $("goalName").value = g ? g.title : (preset && preset.title) || "";
+    $("goalTarget").value = g ? amountInputText(g.target) : "";
+    $("goalNoDate").checked = g ? !g.deadline : false;
+    $("goalDate").value = g && g.deadline ? g.deadline : addMonths(todayStr(), 12);
+    $("goalSavedBox").hidden = !!g;
+    $("goalSaved").value = "";
+    document.querySelectorAll("#goalPrio input").forEach(function (r) { r.checked = +r.value === (g ? g.priority : 2); });
+    $("goalPause").hidden = !g; $("goalDelete").hidden = !g;
+    if (g) $("goalPause").textContent = g.paused ? "Снять с паузы" : "Поставить на паузу";
+    $("goalError").hidden = true;
+    renderGoalIcons();
+    openModal("goalModal", opener);
+    $("goalName").focus({ preventScroll: true });
+  }
+  function renderGoalIcons() {
+    document.querySelectorAll("#goalIcons button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.textContent === goalIcon)); });
+    $("goalDate").disabled = $("goalNoDate").checked;
+  }
+  function goalFail(t, el) { $("goalError").textContent = t; $("goalError").hidden = false; if (el) el.focus(); }
+  function saveGoal() {
+    var name = $("goalName").value.trim(), target = parseAmount($("goalTarget").value), noDate = $("goalNoDate").checked, date = $("goalDate").value;
+    var savedText = $("goalSaved").value.trim(), saved0 = savedText ? parseAmount(savedText) : 0;
+    if (!name) { goalFail("Введите название", $("goalName")); return; }
+    if (!target || target > MAX_AMOUNT) { goalFail(target ? TOO_BIG_TEXT : "Введите, сколько нужно, например 100000", $("goalTarget")); return; }
+    if (!noDate && !isValidDate(date)) { goalFail("Выберите срок или «Без срока»", $("goalDate")); return; }
+    if (savedText && (!saved0 || saved0 > MAX_AMOUNT)) { goalFail("Введите накопленное числом", $("goalSaved")); return; }
+    var prio = +((document.querySelector("#goalPrio input:checked") || {}).value || 2);
+    var g = goalEditId && goalById(goalEditId), isNew = !g;
+    if (!g) { g = { id: makeId(), contributions: [], paused: false }; }
+    g.title = name; g.target = target; g.deadline = noDate ? null : date; g.priority = prio; g.icon = goalIcon;
+    if (isNew) {
+      if (saved0) g.contributions.push({ id: makeId(), date: todayStr(), amount: saved0, accountId: "" }); // «уже накоплено» — без счёта
+      state.goals.push(g);
+    }
+    save(); render(); closeModal();
+    toast(isNew ? "Цель добавлена: " + name : "Цель сохранена");
+  }
+  function deleteGoal() {
+    var g = goalById(goalEditId);
+    if (!g) return;
+    var by = dict(), total = 0;
+    g.contributions.forEach(function (c) { if (c.accountId) { by[c.accountId] = (by[c.accountId] || 0) + c.amount; } });
+    Object.keys(by).forEach(function (k) { if (by[k] > 0) total += by[k]; });
+    if (!confirm("Удалить «" + g.title + "»?" + (total ? " Отложенные " + stripAmt(money(total)) + " вернутся на счета, с которых вносились" : ""))) return;
+    // Деньги — обратно на счета записью «Возврат из копилки», история взносов остаётся в «Операциях»
+    var added = [];
+    Object.keys(by).forEach(function (k) { if (by[k] > 0) { var c = { id: makeId(), date: todayStr(), amount: -by[k], accountId: k, ret: true }; g.contributions.push(c); added.push(c); } });
+    g.deleted = true;
+    var plans = state.plans.filter(function (p) { return p.kind === "goal" && p.goalId === g.id; });
+    save(); render(); closeModal();
+    toast("Цель удалена: " + g.title, "Отменить", function () {
+      g.contributions = g.contributions.filter(function (c) { return added.indexOf(c) === -1; });
+      delete g.deleted;
+      plans.forEach(function (p) { if (state.plans.indexOf(p) === -1) state.plans.push(p); });
+      save(); render(); toast("Цель восстановлена");
+    }, 6000);
+  }
+  $("goalSaveBtn").addEventListener("click", saveGoal);
+  $("goalDelete").addEventListener("click", deleteGoal);
+  $("goalPause").addEventListener("click", function () { var g = goalById(goalEditId); if (g) { closeModal(); setGoalPaused(g, !g.paused); } });
+  $("goalNoDate").addEventListener("change", renderGoalIcons);
+  document.querySelectorAll("#goalIcons button").forEach(function (b) { b.addEventListener("click", function () { goalIcon = b.textContent; renderGoalIcons(); }); });
+  $("goalModal").addEventListener("keydown", function (e) { if (e.key === "Enter" && e.target.tagName === "INPUT" && e.target.type !== "checkbox" && e.target.type !== "radio" && e.target.type !== "date") { e.preventDefault(); saveGoal(); } });
+  ["goalName", "goalTarget", "goalSaved", "goalDate"].forEach(function (id) { $(id).addEventListener("input", function () { $("goalError").hidden = true; }); });
+  $("gsAdd").addEventListener("click", function () { openGoalEditor(null, $("gsAdd")); });
+  $("goalsAdd").addEventListener("click", function () { openGoalEditor(null, $("goalsAdd")); });
+  document.querySelectorAll("#goalsEmpty [data-goal-tpl]").forEach(function (b) {
+    b.addEventListener("click", function () { var v = b.getAttribute("data-goal-tpl"); openGoalEditor(null, b, v === "trip" ? { title: "Отпуск", icon: "✈️" } : { title: "Резервный фонд", icon: "🛡" }); });
+  });
+  // «Что можно сделать» (15.6): два варианта, ничего не меняется без нажатия и подтверждения
+  var fixGoalId = null;
+  function openGoalFix(id, opener) {
+    var g = goalById(id), r = g && goalProgress(g);
+    if (!g || !r.late) return;
+    fixGoalId = id;
+    var gp = goalPlan(g);
+    $("fixPayText").textContent = "Откладывать " + money(r.fixPay) + " в месяц" + (r.pace ? " вместо " + money(r.pace) : "") + " — успеете к " + longDate(g.deadline, true);
+    $("fixDateText").textContent = "Перенести срок на " + longDate(r.eta, true) + " — взнос прежний";
+    $("fixPay").textContent = gp ? "Изменить взнос" : "Назначить взнос";
+    openModal("fixModal", opener);
+  }
+  $("fixPay").addEventListener("click", function () {
+    var g = goalById(fixGoalId), r = g && goalProgress(g);
+    if (!g) return;
+    if (!confirm("Изменить регулярный взнос на " + stripAmt(money(r.fixPay)) + " в месяц?")) return;
+    var gp = goalPlan(g), was = gp ? { amount: gp.amount, repeat: gp.repeat } : null;
+    if (gp) { gp.amount = r.fixPay; gp.repeat = { every: "month" }; }
+    else { gp = { id: makeId(), kind: "goal", goalId: g.id, type: "expense", amount: r.fixPay, category: "", accountId: rubAccountId(), comment: "", title: "Взнос в цель", date: addDays(todayStr(), 1), repeat: { every: "month" }, remindDays: 0, marks: {} }; state.plans.push(gp); }
+    save(); render(); closeModal();
+    toast("Взнос изменён", "Отменить", function () {
+      if (was) { gp.amount = was.amount; gp.repeat = was.repeat; } else state.plans.splice(state.plans.indexOf(gp), 1);
+      save(); render();
+    }, 6000);
+  });
+  $("fixDate").addEventListener("click", function () {
+    var g = goalById(fixGoalId), r = g && goalProgress(g);
+    if (!g) return;
+    if (!confirm("Перенести срок «" + g.title + "» на " + longDate(r.eta, true) + "?")) return;
+    var was = g.deadline;
+    g.deadline = r.eta;
+    save(); render(); closeModal();
+    toast("Срок перенесён", "Отменить", function () { g.deadline = was; save(); render(); }, 6000);
+  });
+  $("fixKeep").addEventListener("click", function () { closeModal(); });
+
+  // ---------- Форма «Взнос в цель» / «Из цели» — та же форма операции (17.25.7) ----------
+  var goalMode = null; // { goalId, dir: "in"|"out" }
+  var formPlan = null; // { id, date } — пункт плана, из которого открыли форму («Записать»)
+  function rubAccounts() { return activeAccounts().filter(function (a) { return a.currency === "RUB"; }); }
+  function rubAccountId() { var r = rubAccounts(), d = rememberedAcc("expense"); return r.some(function (a) { return a.id === d; }) ? d : r[0] ? r[0].id : defaultAccountId(); }
+  function goalAcc() { var a = currentAcc && accountById(currentAcc); return a && !a.archived && a.currency === "RUB" ? a.id : rubAccountId(); }
+  function openGoalForm(goalId, dir, extra) {
+    extra = extra || {};
+    if (!liveGoals().filter(function (g) { return !g.paused; }).length && !goalById(goalId)) { toast("Сначала добавьте цель"); goTo("budget"); setPlanSub("goals"); return; }
+    if (editingId) finishEdit(null, null);
+    goalMode = { goalId: goalId || firstGoalId(), dir: dir || "in" };
+    currentAcc = extra.accountId || null;
+    $("amount").value = isValidAmount(extra.amount) ? amountInputText(extra.amount) : "";
+    openSheet({ goal: true, date: todayStr(), planId: extra.planId, planDate: extra.planDate, source: "goal" });
+  }
+  function firstGoalId() { var l = liveGoals().filter(function (g) { return !g.paused; }).sort(goalOrder); return l[0] ? l[0].id : null; }
+  function applyGoalMode() {
+    var on = !!goalMode, g = on && goalById(goalMode.goalId);
+    $("sheet").classList.toggle("goal-mode", on);
+    $("goalRow").hidden = !on;
+    $("goalHint").hidden = !on;
+    document.querySelector(".type-switch").hidden = on;
+    if (!on) { $("accLabel").textContent = "Счёт"; return; }
+    ["catLabel", "catPills", "tplLane", "saveTplBtn", "trfNeed", "transferFields", "toAmountBox", "transferHint"].forEach(function (id) { $(id).hidden = true; });
+    var out = goalMode.dir === "out";
+    $("formTitle").textContent = out ? "Из цели" : "Взнос в цель";
+    $("goalRowLabel").textContent = out ? "Из цели" : "В цель";
+    $("accLabel").textContent = out ? "На счёт" : "Со счёта";
+    var list = liveGoals().filter(function (x) { return out ? goalSaved(x) > 0 : !x.paused; }).sort(goalOrder);
+    if (g && list.indexOf(g) === -1) list.unshift(g);
+    var sel = $("goalSelect");
+    $("goalSelBox").hidden = list.length < 2; $("goalOne").hidden = list.length >= 2;
+    if (list.length >= 2) {
+      var sig = list.map(function (x) { return x.id; }).join(",");
+      if (sel.getAttribute("data-sig") !== sig) {
+        sel.innerHTML = "";
+        list.forEach(function (x) { var o = document.createElement("option"); o.value = x.id; o.textContent = goalIco(x) + " " + x.title; sel.appendChild(o); });
+        sel.setAttribute("data-sig", sig);
+      }
+      sel.value = goalMode.goalId;
+    } else $("goalOne").textContent = g ? goalIco(g) + " " + g.title : "";
+    // счёт: только рублёвые (цели — в рублях)
+    var ra = rubAccounts();
+    $("accField").hidden = ra.length < 2;
+    $("amountCur").textContent = "₽";
+    if (ra.length >= 2) {
+      var asel = $("accountSelect");
+      asel.innerHTML = "";
+      ra.forEach(function (a) { var o = document.createElement("option"); o.value = a.id; o.textContent = (ACC_KINDS[a.kind] || ACC_KINDS.card).icon + " " + a.name; asel.appendChild(o); });
+      asel.value = goalAcc();
+    }
+    renderGoalHint();
+  }
+  function renderGoalHint() {
+    if (!goalMode) return;
+    var g = goalById(goalMode.goalId), am = parseAmount($("amount").value) || 0;
+    if (!g) { $("goalHint").textContent = ""; return; }
+    var saved = goalSaved(g);
+    $("goalHint").textContent = goalMode.dir === "out" ? "В копилке " + money(saved) + " · вернётся на счёт"
+      : saved + am >= g.target ? "Цель будет достигнута · это не расход" : "Останется " + money(g.target - saved - am) + " до цели · это не расход";
+  }
+  function goalSubmitText() {
+    var am = parseAmount($("amount").value);
+    return (goalMode.dir === "out" ? "Забрать" : "Отложить") + (am && am <= MAX_AMOUNT ? " " + money(am) : "");
+  }
+  $("goalSelect").addEventListener("change", function () { if (goalMode) { goalMode.goalId = this.value; renderForm(); } });
+  $("amount").addEventListener("input", function () { if (goalMode) { renderGoalHint(); renderDatePills(); } });
+  function submitGoal(amount, date) {
+    var g = goalById(goalMode.goalId);
+    if (!g) { showFormError("Выберите цель"); return; }
+    var out = goalMode.dir === "out", saved = goalSaved(g);
+    if (out && amount > saved) { showFormError("В копилке только " + stripAmt(money(saved))); return; }
+    var c = { id: makeId(), date: date, amount: out ? -amount : amount, accountId: goalAcc() };
+    var fp = formPlan, p = fp && planById(fp.id);
+    if (p && !out) { c.planId = p.id; c.planDate = fp.date; setMark(p, fp.date, "done"); }
+    g.contributions.push(c);
+    if (!out) rememberAcc("expense", c.accountId);
+    save();
+    $("amount").value = "";
+    clearFormError();
+    goalMode = null; formPlan = null;
+    closeSheet();
+    renderForm();
+    render();
+    toast((out ? "Из копилки " + money(amount) + " · " : "Отложено " + money(amount) + " · ") + g.title, "Отменить", function () {
+      g.contributions = g.contributions.filter(function (x) { return x !== c; });
+      if (p && c.planId) setMark(p, c.planDate, "");
+      save(); render(); toast("Взнос отменён");
+    }, 6000);
+  }
+
+  // ---------- «Операции»: взносы в цели — строки 🐷 без знака (не расход) ----------
+  function contribItems() {
+    var out = [];
+    state.goals.forEach(function (g) {
+      g.contributions.forEach(function (c) {
+        if (!c.accountId) return; // «уже накоплено» при создании цели — не движение по счёту
+        out.push({ id: "gc-" + c.id, type: "goal", amount: Math.abs(c.amount), date: c.date, accountId: c.accountId, category: "", comment: "",
+                   goal: g, contrib: c, label: c.ret ? "Возврат из копилки «" + g.title + "»" : c.amount < 0 ? "Из цели «" + g.title + "»" : "В цель «" + g.title + "»" });
+      });
+    });
+    return out;
+  }
+  function removeContrib(it) {
+    var g = it.goal, c = it.contrib, i = g.contributions.indexOf(c);
+    if (i === -1) return;
+    g.contributions.splice(i, 1);
+    var p = c.planId && planById(c.planId);
+    if (p && c.planDate) setMark(p, c.planDate, "");
+    save(); render();
+    toast("Взнос удалён", "Отменить", function () { g.contributions.splice(Math.min(i, g.contributions.length), 0, c); if (p && c.planDate) setMark(p, c.planDate, "done"); save(); render(); }, 6000);
+  }
+  function renderContribOp(it, last) {
+    var li = document.createElement("li");
+    li.className = "op goal-op" + (last ? " last" : "");
+    li.setAttribute("data-id", it.id);
+    var dp = it.date.split("-"), sumText = money(it.amount);
+    li.innerHTML = '<span class="c-date num"></span><span class="ico" aria-hidden="true">🐷</span><div class="info"><div class="cat"></div><div class="sum sum-alt num goal"></div></div>' +
+                   '<span class="c-acc"></span><div class="sum num goal"></div><div class="actions"></div>';
+    li.querySelector(".c-date").textContent = +dp[2] + " " + MONTHS_GEN[+dp[1] - 1].slice(0, 3) + (+dp[0] !== new Date().getFullYear() ? " " + dp[0] : "");
+    setHighlighted(li.querySelector(".cat"), it.label);
+    li.querySelectorAll(".sum").forEach(function (s) { s.textContent = sumText; });
+    li.querySelector(".c-acc").textContent = accountName(it.accountId);
+    var dots = document.createElement("button");
+    dots.type = "button";
+    dots.className = "icon more-act";
+    dots.innerHTML = lineIcon('<circle cx="5.5" cy="12" r="1.25"/><circle cx="12" cy="12" r="1.25"/><circle cx="18.5" cy="12" r="1.25"/>', 22);
+    dots.setAttribute("aria-label", "Действия: " + it.label + ", " + sumText);
+    dots.title = "Действия";
+    function menu(anchor) {
+      openMiniMenu(anchor, [{ label: "Открыть цели", fn: function () { goTo("budget"); setPlanSub("goals"); } },
+                            { label: "Удалить взнос", danger: true, fn: function () { removeContrib(it); } }]);
+    }
+    dots.addEventListener("click", function (e) { e.stopPropagation(); menu(dots); });
+    li.querySelector(".actions").appendChild(dots);
+    li.addEventListener("click", function () { menu(li); });
+    return li;
+  }
+
+  setPlanSub(planSub, true);
   resetForm();
   // Работа без интернета (sw.js): только по ссылке http/https — по file:// service worker недоступен, ошибок в консоли нет
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
