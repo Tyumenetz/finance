@@ -1695,9 +1695,10 @@
   .modal .amount-field.ev-amount { margin-bottom: 12px; }
   .modal .amount-field.ev-amount input { margin: 0; }
   .ev-remind { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .ev-remind button { position: relative; height: 36px; min-height: 36px; padding: 0 14px; background: var(--glass-2); color: var(--text); font-size: 14px; margin: 4px 0; }
-  .ev-remind button::before { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; }
-  .ev-remind button[aria-pressed="true"] { background: var(--seg-on); color: var(--seg-on-text); }
+  /* №47: кнопка 44 × 44 (прозрачная рамка 4), видимая таблетка — 36 */
+  .ev-remind { gap: 0 4px; margin: -4px 0 8px -4px; }
+  .ev-remind button { height: 44px; min-height: 44px; min-width: 44px; padding: 0 14px; border: 4px solid transparent; background-clip: padding-box; background-color: var(--glass-2); color: var(--text); font-size: 14px; margin: 0; }
+  .ev-remind button[aria-pressed="true"] { background-color: var(--seg-on); color: var(--seg-on-text); }
   .modal .select { display: block; margin-bottom: 12px; }
   .ev-foot { position: sticky; bottom: calc(-20px - env(safe-area-inset-bottom)); margin: 8px -20px 0; padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); background: inherit; }
   .ev-foot button { width: 100%; min-height: 52px; }
@@ -1798,6 +1799,28 @@
     .plan-banner .pb-later { grid-column: 3; grid-row: 1; }
   }
   @media (min-width: 1025px) { .plan-banners { flex-direction: row; flex-wrap: wrap; align-items: center; margin-bottom: 16px; } .plan-banner { flex: 1 1 360px; } }
+
+  /* ===== 1.3.2: правки владельца по телефону ===== */
+  .hero-card button#setLimits { padding-left: 0; padding-right: 0; } /* по левой линии текста карточки */
+  .demo-foot { display: flex; justify-content: center; margin: 4px 0 8px; }
+  .demo-foot button.link { font-size: 13px; color: var(--text-2); min-height: 44px; }
+  button.icon.filter-btn { display: none; } /* только телефон и планшет */
+  .filter-modal .f-sel { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .filter-modal .f-sel .select { flex: 1; min-width: 0; margin: 0; }
+  .filter-modal .f-sel[hidden] { display: none; }
+  .filter-foot { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ev-kinds button[hidden] { display: none; }
+  @media (max-width: 1024px) {
+    .ops-h1 { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    #opsHead { justify-content: flex-start; }
+    .ops-search { display: flex; align-items: center; gap: 8px; }
+    .ops-search input { flex: 1; min-width: 0; }
+    button.icon.filter-btn { position: relative; display: inline-flex; width: 44px; height: 44px; min-height: 44px; flex: none; border-radius: 50%; background: var(--glass-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--glass-2-border); }
+    .f-count { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--seg-on); color: var(--seg-on-text); font-size: 11px; line-height: 18px; font-weight: 500; text-align: center; }
+    .f-count[hidden] { display: none; }
+    #fRow > .f-sel { display: none; }
+    #fRow:not(:has(> :not(.f-sel):not([hidden]))) { display: none; }
+  }
 </style>
 </head>
 <body>
@@ -1929,7 +1952,6 @@
         <div class="hero-empty" id="heroEmpty" hidden>
           <div id="heroEmptyText">В этом месяце трат пока нет</div>
           <button type="button" id="firstSpend">Добавить первую трату</button>
-          <button type="button" class="secondary" id="demoFirst">Посмотреть на примере</button>
         </div>
       </section>
       <section class="card flow-card home-flow" id="homeFlowCard">
@@ -1965,19 +1987,21 @@
       </section>
 
     </div>
+      <!-- 1.3.2: «Посмотреть на примере» — маленькой ссылкой внизу Главной (для проверки на тестовых данных) -->
+      <div class="demo-foot"><button type="button" class="link" id="demoFirst">Посмотреть на примере</button></div>
     </section>
 
     <section class="screen" id="screen-ops" data-screen="ops" hidden>
-      <div class="ops-head" id="opsHead"><h1>Операции</h1></div>
+      <div class="ops-head" id="opsHead"><h1 class="ops-h1">Операции</h1></div>
     <!-- Список операций (5.7) -->
     <section class="card">
       <div class="filters">
-        <div class="ops-search"><input id="opsSearch" type="search" placeholder="Поиск" aria-label="Найти операцию: сумма, категория, комментарий, счёт" autocomplete="off"></div>
+        <div class="ops-search"><input id="opsSearch" type="search" placeholder="Поиск" aria-label="Найти операцию: сумма, категория, комментарий, счёт" autocomplete="off"><button type="button" class="icon filter-btn" id="filterBtn" aria-haspopup="dialog" aria-controls="filterModal" aria-label="Фильтры" title="Фильтры"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5h16M7 12h10M10 17.5h4"/></svg><span class="f-count" id="filterCount" hidden></span></button></div>
         <div class="segmented compact" id="filterPeriod" role="radiogroup" aria-label="Период">
           <label><input type="radio" name="period" value="month" checked><span>Текущий месяц</span></label>
           <label><input type="radio" name="period" value="all"><span>Всё время</span></label>
         </div>
-        <div class="f-row">
+        <div class="f-row" id="fRow">
         <span class="f-sel"><span class="select"><select id="filterType" aria-label="Тип" data-empty="Тип">
           <option value="">Все типы</option><option value="expense">Расходы</option><option value="income">Доходы</option><option value="transfer">Переводы</option><option value="goal">Взносы</option>
         </select></span><button type="button" class="icon f-clear" data-clear="filterType" aria-label="Сбросить тип" title="Сбросить" hidden>✕</button></span>
@@ -1989,7 +2013,7 @@
       <div class="ops-thead" aria-hidden="true"><span>Дата</span><span>Категория</span><span>Комментарий</span><span>Счёт</span><span>Сумма</span><span></span></div>
       <ul class="ops" id="opsList"></ul>
       <div class="empty" id="opsEmpty" hidden>
-        <span class="e-icon" aria-hidden="true">🧾</span><span id="opsEmptyText">Операций не найдено</span>
+        <span id="opsEmptyText">Операций не найдено</span>
         <div><button type="button" class="secondary" id="resetFilters" hidden>Сбросить фильтры</button></div>
       </div>
     </section>
@@ -2029,10 +2053,9 @@
               <ul class="ev-list" id="cuList"></ul>
               <div class="cu-none" id="cuNone" hidden></div>
               <div class="cu-empty" id="cuEmpty" hidden>
-                <p>Здесь будут платежи, зарплата и дни рождения — приложение напомнит заранее</p>
+                <p>Здесь будут платежи и дни рождения — приложение напомнит заранее</p>
                 <div class="cu-tpls">
                   <button type="button" class="tpl-chip" data-tpl="regular">＋ Аренда</button>
-                  <button type="button" class="tpl-chip" data-tpl="salary">＋ Зарплата</button>
                   <button type="button" class="tpl-chip" data-tpl="birthday">＋ День рождения</button>
                 </div>
               </div>
@@ -2050,7 +2073,6 @@
         <div class="gp-label" id="goalsPausedLabel" hidden>На паузе</div>
         <div class="goals-grid" id="goalsPaused"></div>
         <section class="card goals-empty" id="goalsEmpty" hidden>
-          <div class="ge-ico" aria-hidden="true">🐷</div>
           <p>Копите на отпуск, технику или резерв — приложение посчитает, сколько откладывать</p>
           <button type="button" id="goalsAdd">＋ Цель</button>
           <div class="cu-tpls">
@@ -2100,7 +2122,7 @@
             </div>
             <ul class="budget" id="budgetList"></ul>
             <div class="empty" id="budgetEmpty" hidden>
-              <span class="e-icon" aria-hidden="true">🎯</span>Задайте лимиты, чтобы контролировать траты<br>
+              Задайте лимиты, чтобы контролировать траты<br>
               <button type="button" class="secondary" id="budgetSetup">Настроить</button>
             </div>
           </section>
@@ -2118,7 +2140,7 @@
               <canvas id="chart" width="200" height="200" role="img" aria-label="Диаграмма расходов по категориям"></canvas>
               <ul class="legend" id="legend"></ul>
             </div>
-            <div class="empty" id="chartEmpty" hidden><span class="e-icon" aria-hidden="true">📊</span><span id="chartEmptyText">Расходов за месяц нет</span></div>
+            <div class="empty" id="chartEmpty" hidden><span id="chartEmptyText">Расходов за месяц нет</span></div>
           </section>
         </div>
 
@@ -2310,6 +2332,12 @@
     <div class="ev-foot"><button type="button" id="goalSaveBtn">Сохранить цель</button></div>
     <button type="button" class="soft goal-pause" id="goalPause" hidden>Поставить на паузу</button>
     <button type="button" class="link danger ev-del" id="goalDelete" hidden>Удалить цель</button>
+  </section>
+  <!-- 1.3.2: фильтры «Операций» на телефоне — лист; селекты переезжают сюда на время открытия -->
+  <section class="modal side filter-modal" id="filterModal" role="dialog" aria-modal="true" aria-labelledby="filterH" hidden>
+    <div class="modal-head"><span class="m-handle" aria-hidden="true"></span><h2 id="filterH">Фильтры</h2><button type="button" class="icon modal-close" aria-label="Закрыть" title="Закрыть">✕</button></div>
+    <div class="filter-body" id="filterBody"></div>
+    <div class="ev-foot filter-foot"><button type="button" id="filterShow">Показать</button><button type="button" class="soft" id="filterReset">Сбросить</button></div>
   </section>
   <!-- «Что можно сделать» (15.6) -->
   <section class="modal fix-modal" id="fixModal" role="dialog" aria-modal="true" aria-labelledby="fixH" hidden>
@@ -3177,8 +3205,16 @@
   }
 
   // Колокольчик: сколько напоминаний сейчас (плашки и перерасход)
+  // 1.3.2: число на 🔔 — только непросмотренные; открыли напоминания (🔔) — число сразу пропадает
+  var SEEN_KEY = "finance-app-seen";
+  function bellKeys() {
+    return collectBanners().map(function (b) { return b.occ ? b.kind + "|" + b.occ.plan.id + "|" + b.occ.date : b.kind; })
+      .concat([].map.call($("overList").children, function (el) { return "over|" + el.textContent; }));
+  }
+  function loadSeen() { try { var v = JSON.parse(localStorage.getItem(SEEN_KEY) || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+  function markBellSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify(bellKeys())); } catch (e) {} renderBell(); }
   function renderBell() {
-    var n = collectBanners().length + $("overList").children.length;
+    var seen = loadSeen(), n = bellKeys().filter(function (k) { return seen.indexOf(k) === -1; }).length;
     $("bellCount").hidden = !n;
     $("bellCount").textContent = n;
     $("bellBtn").setAttribute("aria-label", n ? "Напоминания: " + n : "Напоминаний нет");
@@ -3968,6 +4004,9 @@
   }
   function renderFilterClears() {
     document.querySelectorAll(".f-clear").forEach(function (b) { b.hidden = !$(b.getAttribute("data-clear")).value; });
+    var nf = ["filterType", "filterCategory", "filterAccount"].filter(function (id) { return $(id).value; }).length;
+    $("filterCount").hidden = !nf; $("filterCount").textContent = nf;
+    $("filterBtn").setAttribute("aria-label", nf ? "Фильтры, включено: " + nf : "Фильтры");
   }
   // Подсветка найденного (14.6): текст с <mark> вокруг совпадений
   var listQuery = "";
@@ -4700,6 +4739,7 @@
   function closeModal(silent) {
     if (ddSel) ddClose(true); // №38: список окна не остаётся висеть
     if (!openModalId) return;
+    if (openModalId === "filterModal") restoreFilterSels(); // селекты фильтров — обратно в ряд
     $(openModalId).hidden = true;
     $("modalScrim").hidden = true;
     MODAL_UNDER.forEach(function (x, i) { $(x).inert = modalInert[i]; });
@@ -5917,6 +5957,7 @@
   // Верхняя строка компьютера: «＋ Добавить операцию», поиск по операциям, колокольчик
   $("addOpBtn").addEventListener("click", function () { openAddMenu($("addOpBtn")); });
   $("bellBtn").addEventListener("click", function () {
+    markBellSeen();
     goTo("home");
     var first = [$("newerBanner"), $("corruptBanner"), $("overList")].filter(function (el) { return !el.hidden && el.offsetParent && (el.id !== "overList" || el.children.length); })[0];
     if (first) first.scrollIntoView({ behavior: scrollBehavior(), block: "center" });
@@ -6154,7 +6195,7 @@
     salary:   { name: "Доход", icon: "💼", type: "income", dot: "inc" },
     birthday: { name: "День рождения", icon: "🎂", type: "expense", dot: "bday" },
     event:    { name: "Событие", icon: "✨", type: "expense", dot: "ev" },
-    goal:     { name: "Взнос в цель", icon: "🐷", type: "expense", dot: "goal" }
+    goal:     { name: "Взнос в цель", icon: "🎯", type: "expense", dot: "goal" }
   };
   var EV_ICONS = ["✨", "✈️", "💍", "🎉", "🎓", "🏥"];
   var GOAL_ICONS = ["✈️", "💻", "🏠", "🚗", "🛡", "🎁", "🎓", "💍"];
@@ -6216,7 +6257,7 @@
   }
 
   // ---------- Подсчёты (architecture.md 4) ----------
-  function goalIco(g) { return g.icon || "🐷"; }
+  function goalIco(g) { return g.icon || "🎯"; }
   function goalById(id) { for (var i = 0; i < state.goals.length; i++) if (state.goals[i].id === id) return state.goals[i]; return null; }
   function liveGoals() { return state.goals.filter(function (g) { return !g.deleted; }); }
   function goalLive(id) { var g = goalById(id); return !!g && !g.deleted; }
@@ -6322,7 +6363,7 @@
 
   // ---------- Календарь ----------
   var calY = new Date().getFullYear(), calM = new Date().getMonth(), calSel = null, calFocusDate = null;
-  function planIcon(p) { return p.kind === "event" && p.icon ? p.icon : p.kind === "goal" && goalById(p.goalId) ? "🐷" : EV_KIND[p.kind].icon; }
+  function planIcon(p) { return p.kind === "event" && p.icon ? p.icon : p.kind === "goal" && goalById(p.goalId) ? goalIco(goalById(p.goalId)) : EV_KIND[p.kind].icon; }
   function planTitle(p) { if (p.kind === "goal") { var g = goalById(p.goalId); return "Взнос: " + (g ? g.title : "цель"); } return p.title; }
   function planSumText(p) {
     if (!p.amount) return "";
@@ -6429,7 +6470,12 @@
     if (calSel) groups = [["", occurrences(calSel, calSel)]];
     else {
       var sun = addDays(t, (7 - parseD(t).getDay()) % 7), g = [[], [], []];
-      overdue(t).concat(planned(t, addDays(t, UPCOMING_DAYS))).forEach(function (o) { g[o.date <= t ? 0 : o.date <= sun ? 1 : 2].push(o); });
+      var seenPlan = dict(); // 1.3.2: у повторяющегося события — только ближайший раз
+      overdue(t).concat(planned(t, addDays(t, UPCOMING_DAYS))).forEach(function (o) {
+        if (seenPlan[o.plan.id]) return;
+        seenPlan[o.plan.id] = true;
+        g[o.date <= t ? 0 : o.date <= sun ? 1 : 2].push(o);
+      });
       groups = [["Сегодня", g[0]], ["Эта неделя", g[1]], ["Позже", g[2]]];
     }
     var any = false;
@@ -6528,6 +6574,7 @@
   function renderEvKind() {
     var k = evKind, goal = k === "goal";
     document.querySelectorAll("#evKinds button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-kind") === k)); });
+    $("evKinds").querySelector('[data-kind="salary"]').hidden = k !== "salary"; // 1.3.2: доход в событиях не создаём, старые — показываем и правим
     $("evKinds").hidden = goal;
     $("evTitleBox").hidden = goal;
     $("evGoalLine").hidden = !goal;
@@ -6543,7 +6590,7 @@
     $("evAccBox").hidden = !(k === "regular" || k === "salary" || goal) || activeAccounts().length < 2;
     $("evRepeatBox").hidden = k === "birthday";
     [].forEach.call($("evRepeat").options, function (o) { o.hidden = goal && (o.value === "" || o.value === "year"); });
-    $("evDateLabel").textContent = k === "birthday" ? "День рождения" : k === "event" ? "Дата" : "Первая дата";
+    $("evDateLabel").textContent = k === "birthday" ? "День рождения" : k === "event" || k === "salary" ? "Дата" : "Дата платежа";
     document.querySelectorAll("#evRemind button").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-d") === evRemind)); });
     $("evSave").textContent = goal ? "Сохранить взнос" : "Сохранить событие";
   }
@@ -6835,27 +6882,24 @@
     save(); render(); closeModal();
     toast(isNew ? "Цель добавлена: " + name : "Цель сохранена");
   }
-  // 1.3.1: при удалении цели возвращается ровно остаток копилки (не больше). Делим его по счетам, с которых
-  // вносили, — каждому не больше его чистого вклада (взносы − «Забрать»); остаток (например, «уже накоплено»
-  // без счёта) — на рублёвый счёт по умолчанию. Сумма на счетах + в копилках не меняется.
+  // 1.3.1 / №46: при удалении цели на счета возвращаются только взносы со счетов за вычетом «Забрать» и не больше
+  // остатка копилки. «Уже накоплено» (без счёта) никуда не возвращается: этих денег на счетах приложения не было.
+  // Делим по счетам, с которых вносили, — каждому не больше его чистого вклада.
   function goalReturnParts(g) {
-    var left = Math.max(0, goalSaved(g)), by = dict(), parts = [];
-    g.contributions.forEach(function (c) { if (c.accountId) by[c.accountId] = (by[c.accountId] || 0) + c.amount; });
+    var by = dict(), parts = [], net = 0;
+    g.contributions.forEach(function (c) { if (c.accountId) { by[c.accountId] = (by[c.accountId] || 0) + c.amount; net += c.amount; } });
+    var left = Math.max(0, Math.min(net, goalSaved(g)));
     Object.keys(by).filter(function (k) { return by[k] > 0 && accountById(k); }).sort(function (a, b) { return by[b] - by[a]; }).forEach(function (k) {
       var x = Math.min(by[k], left);
       if (x > 0) { parts.push({ accountId: k, amount: x }); left -= x; }
     });
-    if (left > 0) {
-      var to = rubAccountId(), p = parts.filter(function (x) { return x.accountId === to; })[0];
-      if (p) p.amount += left; else if (accountById(to)) parts.push({ accountId: to, amount: left });
-    }
     return parts;
   }
   function deleteGoal() {
     var g = goalById(goalEditId);
     if (!g) return;
     var parts = goalReturnParts(g), total = parts.reduce(function (s, x) { return s + x.amount; }, 0);
-    if (!confirm("Удалить «" + g.title + "»?" + (total ? " Отложенные " + stripAmt(money(total)) + " вернутся на счета, с которых вносились" : ""))) return;
+    if (!confirm("Удалить «" + g.title + "»?" + (total ? " На счета, с которых вносили, вернётся " + stripAmt(money(total)) + "." : " На счета ничего не вернётся."))) return;
     // Деньги — обратно на счета записью «Возврат из копилки», история взносов остаётся в «Операциях»
     var added = [];
     parts.forEach(function (x) { var c = { id: makeId(), date: todayStr(), amount: -x.amount, accountId: x.accountId, ret: true }; g.contributions.push(c); added.push(c); });
@@ -7042,8 +7086,9 @@
     li.className = "op goal-op" + (last ? " last" : "");
     li.setAttribute("data-id", it.id);
     var dp = it.date.split("-"), sumText = money(it.amount);
-    li.innerHTML = '<span class="c-date num"></span><span class="ico" aria-hidden="true">🐷</span><div class="info"><div class="cat"></div><div class="sum sum-alt num goal"></div></div>' +
+    li.innerHTML = '<span class="c-date num"></span><span class="ico" aria-hidden="true"></span><div class="info"><div class="cat"></div><div class="sum sum-alt num goal"></div></div>' +
                    '<span class="c-acc"></span><div class="sum num goal"></div><div class="actions"></div>';
+    li.querySelector(".ico").textContent = goalIco(it.goal);
     li.querySelector(".c-date").textContent = +dp[2] + " " + MONTHS_GEN[+dp[1] - 1].slice(0, 3) + (+dp[0] !== new Date().getFullYear() ? " " + dp[0] : "");
     setHighlighted(li.querySelector(".cat"), it.label);
     li.querySelectorAll(".sum").forEach(function (s) { s.textContent = sumText; });
@@ -7066,6 +7111,24 @@
     return li;
   }
 
+
+  // ---------- 1.3.2: фильтры «Операций» на телефоне — лист «Тип / Категория / Счёт» ----------
+  function filterSels() { return [$("filterType"), $("filterCategory"), $("filterAccount")].map(function (x) { return x.closest(".f-sel"); }); }
+  function restoreFilterSels() {
+    var f = filterSels(), row = $("fRow"), chip = $("filterDayChip");
+    if (f[0].parentNode === row) return;
+    row.insertBefore(f[0], chip); row.insertBefore(f[1], chip); row.appendChild(f[2]);
+  }
+  $("filterBtn").addEventListener("click", function () {
+    var body = $("filterBody");
+    filterSels().forEach(function (x) { body.appendChild(x); });
+    openModal("filterModal", $("filterBtn"));
+  });
+  $("filterShow").addEventListener("click", function () { closeModal(); });
+  $("filterReset").addEventListener("click", function () {
+    ["filterType", "filterCategory", "filterAccount"].forEach(function (id) { $(id).value = ""; });
+    renderList();
+  });
   setPlanSub(planSub, true);
   resetForm();
   // Работа без интернета (sw.js): только по ссылке http/https — по file:// service worker недоступен, ошибок в консоли нет
